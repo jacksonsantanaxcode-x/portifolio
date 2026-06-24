@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jackson Santana — Desenvolvedor Full Stack</title>
+  <meta name="description" content="Portfólio de Jackson Santana — estudante de tecnologia especializado em Python, n8n e Inteligência Artificial." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ╔══════════════════════════════╗
+       ║          HEADER / NAV        ║
+       ╚══════════════════════════════╝ -->
+  <header class="header" id="header">
+    <nav class="nav container">
+      <a href="#hero" class="nav__logo">
+        <span class="nav__logo-bracket">&lt;</span>JS<span class="nav__logo-bracket">/&gt;</span>
+      </a>
+
+      <ul class="nav__list" id="navList">
+        <li><a href="#sobre"   class="nav__link">Sobre</a></li>
+        <li><a href="#skills"  class="nav__link">Skills</a></li>
+        <li><a href="#projetos" class="nav__link">Projetos</a></li>
+        <li><a href="#contato" class="nav__link">Contato</a></li>
+      </ul>
+
+      <button class="nav__toggle" id="navToggle" aria-label="Abrir menu">
+        <span></span><span></span><span></span>
+      </button>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ╔══════════════════════════════╗
+         ║            HERO              ║
+         ╚══════════════════════════════╝ -->
+    <section class="hero" id="hero">
+      <div class="hero__glow" aria-hidden="true"></div>
+
+      <div class="container hero__container">
+
+        <!-- Avatar -->
+        <div class="hero__avatar-wrap fade-in">
+          <div class="hero__avatar">
+            <img
+              src="foto.jpg"
+              alt="Foto de Jackson Santana"
+              class="hero__avatar-img"
+              id="avatarImg"
+              onerror="this.style.display='none';document.getElementById('avatarInitials').style.display='flex';"
+            />
+            <div class="hero__avatar-initials" id="avatarInitials">JS</div>
+          </div>
+          <span class="hero__status" title="Disponível para projetos"></span>
+        </div>
+
+        <!-- Texto -->
+        <div class="hero__text">
+          <p class="hero__eyebrow fade-in fade-in--d1"><span class="mono">// olá, eu sou</span></p>
+          <h1 class="hero__name fade-in fade-in--d2">Jackson <span class="accent">Santana</span></h1>
+          <p class="hero__role fade-in fade-in--d3">Desenvolvedor <span class="accent">Full Stack</span></p>
+          <p class="hero__bio fade-in fade-in--d4">
+            Estudante de tecnologia com conhecimentos básicos em Python, n8n e Inteligência Artificial.
+            Apaixonado por automatizar fluxos de trabalho e explorar aplicações de IA em projetos práticos.
+            Sempre em busca de novos desafios que unam programação, automação e aprendizado de máquina.
+            Vamos conversar e trocar ideias sobre desenvolvimento e automação!
+          </p>
+          <div class="hero__actions fade-in fade-in--d5">
+            <a href="#projetos" class="btn btn--primary">Ver projetos</a>
+            <a href="cv.pdf" class="btn btn--outline" download>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download CV
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="hero__scroll" aria-hidden="true">↓</div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════╗
+         ║            SOBRE             ║
+         ╚══════════════════════════════╝ -->
+    <section class="section" id="sobre">
+      <div class="container">
+
+        <div class="section__header">
+          <span class="section__tag">01. sobre</span>
+          <h2 class="section__title">Quem sou eu</h2>
+        </div>
+
+        <div class="about__grid">
+          <div class="about__text">
+            <p>
+              Sou um desenvolvedor focado em <strong>Inteligência Artificial</strong> e automação de processos,
+              com experiência em construção de ferramentas que economizam tempo e geram valor real.
+            </p>
+            <p>
+              Minha jornada começou com Python e cresceu para cobrir desde scripts de automação até
+              agentes de IA completos. Acredito que tecnologia deve resolver problemas reais de forma elegante.
+            </p>
+            <p>
+              Estou sempre aprendendo e explorando — especialmente no ecossistema de LLMs, APIs e
+              desenvolvimento web moderno.
+            </p>
+          </div>
+
+          <div class="stats__grid">
+            <div class="stat-card scroll-reveal">
+              <span class="stat-card__num">12+</span>
+              <span class="stat-card__label">Projetos concluídos</span>
+            </div>
+            <div class="stat-card scroll-reveal">
+              <span class="stat-card__num">3+</span>
+              <span class="stat-card__label">Anos de estudo</span>
+            </div>
+            <div class="stat-card scroll-reveal">
+              <span class="stat-card__num">15+</span>
+              <span class="stat-card__label">Tecnologias</span>
+            </div>
+            <div class="stat-card scroll-reveal">
+              <span class="stat-card__num">∞</span>
+              <span class="stat-card__label">Dedicação</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════╗
+         ║           SKILLS             ║
+         ╚══════════════════════════════╝ -->
+    <section class="section section--dark" id="skills">
+      <div class="container">
+
+        <div class="section__header">
+          <span class="section__tag">02. skills</span>
+          <h2 class="section__title">Tecnologias</h2>
+        </div>
+
+        <div class="skills__grid">
+
+          <div class="skill-group scroll-reveal">
+            <h3 class="skill-group__title"><span>🖥️</span> Frontend</h3>
+            <div class="tags">
+              <span class="tag">HTML5</span>
+              <span class="tag">CSS3</span>
+              <span class="tag">JavaScript</span>
+              <span class="tag">React</span>
+              <span class="tag">Tailwind CSS</span>
+            </div>
+          </div>
+
+          <div class="skill-group scroll-reveal">
+            <h3 class="skill-group__title"><span>⚙️</span> Backend &amp; IA</h3>
+            <div class="tags">
+              <span class="tag">Python</span>
+              <span class="tag">FastAPI</span>
+              <span class="tag">LangChain</span>
+              <span class="tag">OpenAI API</span>
+              <span class="tag">Anthropic API</span>
+              <span class="tag">PostgreSQL</span>
+            </div>
+          </div>
+
+          <div class="skill-group scroll-reveal">
+            <h3 class="skill-group__title"><span>🤖</span> Automação</h3>
+            <div class="tags">
+              <span class="tag">Selenium</span>
+              <span class="tag">Playwright</span>
+              <span class="tag">BeautifulSoup</span>
+              <span class="tag">n8n</span>
+              <span class="tag">Zapier</span>
+              <span class="tag">Cron Jobs</span>
+            </div>
+          </div>
+
+          <div class="skill-group scroll-reveal">
+            <h3 class="skill-group__title"><span>🛠️</span> Ferramentas</h3>
+            <div class="tags">
+              <span class="tag">Git</span>
+              <span class="tag">Docker</span>
+              <span class="tag">Linux</span>
+              <span class="tag">VS Code</span>
+              <span class="tag">Postman</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════╗
+         ║          PROJETOS            ║
+         ╚══════════════════════════════╝ -->
+    <section class="section" id="projetos">
+      <div class="container">
+
+        <div class="section__header">
+          <span class="section__tag">03. projetos</span>
+          <h2 class="section__title">O que eu construí</h2>
+        </div>
+
+        <div class="projects__grid">
+
+          <article class="project-card scroll-reveal">
+            <div class="project-card__top">
+              <span class="project-card__icon">✂️</span>
+              <div class="project-card__links">
+                <a href="#" target="_blank" rel="noopener" aria-label="GitHub">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                </a>
+              </div>
+            </div>
+            <h3 class="project-card__title">BarberPro</h3>
+            <p class="project-card__desc">
+              Sistema de barbearia completo com gerenciamento de clientes, serviços e
+              controle do fluxo de atendimento.
+            </p>
+            <div class="tags tags--sm">
+              <span class="tag">HTML</span>
+              <span class="tag">Python</span>
+            </div>
+          </article>
+
+          <article class="project-card scroll-reveal">
+            <div class="project-card__top">
+              <span class="project-card__icon">📅</span>
+              <div class="project-card__links">
+                <a href="#" target="_blank" rel="noopener" aria-label="GitHub">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                </a>
+              </div>
+            </div>
+            <h3 class="project-card__title">Cronograma JK</h3>
+            <p class="project-card__desc">
+              Sistema de agendamento de tarefas com organização por prioridade,
+              prazos e acompanhamento de progresso.
+            </p>
+            <div class="tags tags--sm">
+              <span class="tag">HTML</span>
+              <span class="tag">Python</span>
+            </div>
+          </article>
+
+          <article class="project-card scroll-reveal">
+            <div class="project-card__top">
+              <span class="project-card__icon">💰</span>
+              <div class="project-card__links">
+                <a href="#" target="_blank" rel="noopener" aria-label="GitHub">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                </a>
+              </div>
+            </div>
+            <h3 class="project-card__title">Orçamento</h3>
+            <p class="project-card__desc">
+              Sistema de orçamento financeiro para controle de receitas, despesas e
+              planejamento financeiro pessoal ou empresarial.
+            </p>
+            <div class="tags tags--sm">
+              <span class="tag">HTML</span>
+              <span class="tag">Python</span>
+            </div>
+          </article>
+
+          <article class="project-card project-card--featured scroll-reveal">
+            <div class="project-card__top">
+              <span class="project-card__icon">👕</span>
+              <div class="project-card__links">
+                <a href="#" target="_blank" rel="noopener" aria-label="GitHub">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                </a>
+              </div>
+            </div>
+            <h3 class="project-card__title">Sistema de Lavanderia</h3>
+            <p class="project-card__desc">
+              Sistema de agendamento de clientes com data e hora, controle de entregas
+              e gestão dos pedidos da lavanderia.
+            </p>
+            <div class="tags tags--sm">
+              <span class="tag">HTML</span>
+              <span class="tag">Python</span>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════╗
+         ║           CONTATO            ║
+         ╚══════════════════════════════╝ -->
+    <section class="section section--dark" id="contato">
+      <div class="container container--narrow">
+
+        <div class="section__header">
+          <span class="section__tag">04. contato</span>
+          <h2 class="section__title">Vamos conversar</h2>
+        </div>
+
+        <p class="contato__sub">
+          Estou aberto a projetos freelance, colaborações e novas oportunidades.
+          Me chame em qualquer canal abaixo!
+        </p>
+
+        <div class="contact__list">
+
+          <a href="mailto:jacksonsantana.xcode@gmail.com" class="contact-card scroll-reveal">
+            <div class="contact-card__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            </div>
+            <div class="contact-card__info">
+              <span class="contact-card__label">E-mail</span>
+              <span class="contact-card__value">jacksonsantana.xcode@gmail.com</span>
+            </div>
+            <svg class="contact-card__arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+
+          <a href="https://github.com/jacksonsantanaxcode-x" target="_blank" rel="noopener" class="contact-card scroll-reveal">
+            <div class="contact-card__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+            </div>
+            <div class="contact-card__info">
+              <span class="contact-card__label">GitHub</span>
+              <span class="contact-card__value">github.com/jacksonsantanaxcode-x</span>
+            </div>
+            <svg class="contact-card__arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+
+          <a href="https://linkedin.com/in/seuusuario" target="_blank" rel="noopener" class="contact-card scroll-reveal">
+            <div class="contact-card__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            </div>
+            <div class="contact-card__info">
+              <span class="contact-card__label">LinkedIn</span>
+              <span class="contact-card__value">linkedin.com/in/seuusuario</span>
+            </div>
+            <svg class="contact-card__arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- ╔══════════════════════════════╗
+       ║            FOOTER            ║
+       ╚══════════════════════════════╝ -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__copy">
+        <span class="mono accent">&lt;</span>
+        Feito com dedicação por <strong>Jackson Santana</strong>
+        <span class="mono accent">/&gt;</span>
+      </p>
+      <p class="footer__year mono">© <span id="year"></span></p>
+    </div>
+  </footer>
+
+
+  <script>
+    /* ── Ano dinâmico ── */
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    /* ── Menu mobile ── */
+    const navToggle = document.getElementById('navToggle');
+    const navList   = document.getElementById('navList');
+
+    navToggle.addEventListener('click', () => {
+      const open = navList.classList.toggle('nav__list--open');
+      navToggle.classList.toggle('nav__toggle--open', open);
+      navToggle.setAttribute('aria-expanded', open);
+    });
+
+    navList.querySelectorAll('.nav__link').forEach(link => {
+      link.addEventListener('click', () => {
+        navList.classList.remove('nav__list--open');
+        navToggle.classList.remove('nav__toggle--open');
+        navToggle.setAttribute('aria-expanded', false);
+      });
+    });
+
+    /* ── Sombra no header ao rolar ── */
+    const header = document.getElementById('header');
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('header--scrolled', window.scrollY > 24);
+    }, { passive: true });
+
+    /* ── Fade-in dos cards ao entrar na tela ── */
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('scroll-reveal--visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.scroll-reveal').forEach(el => revealObserver.observe(el));
+  </script>
+
+</body>
+</html>

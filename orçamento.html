@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Controle de Orçamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --card:#FDF5FB;
+    --card-inner:#FFFFFF;
+    --text:#4A2545;
+    --text-light:#8B6F8C;
+    --primary:#E85D9C;
+    --primary-dark:#D03E7E;
+    --secondary:#A78BFA;
+    --secondary-dark:#8B5CF6;
+    --success-bg:#DCFCE7;
+    --success-text:#15803D;
+    --error-bg:#FEE2E2;
+    --error-text:#B91C1C;
+    --border:#F0D9EA;
+    --input-border:#E5E7EB;
+    --table-head:#F3F4F6;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  body{
+    font-family:'Inter', sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  button, input{ font-family:inherit; }
+
+  /* ===== LOGIN ===== */
+  .login-screen{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#FFF0F7,#F5F0FF);
+    padding:24px;
+  }
+  .login-card{
+    background:#fff;
+    max-width:380px;
+    width:100%;
+    padding:40px 32px;
+    border-radius:16px;
+    box-shadow:0 4px 24px rgba(0,0,0,.08);
+    text-align:center;
+  }
+  .login-icon{ font-size:40px; margin-bottom:8px; }
+  .subtitle-small{ font-size:15px; color:var(--text-light); margin-bottom:24px; }
+
+  /* ===== HEADER ===== */
+  .app-header{
+    background:linear-gradient(135deg, var(--primary), var(--secondary));
+    padding:24px;
+    color:#fff;
+  }
+  .header-content{
+    max-width:1200px;
+    margin:0 auto;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .app-title{ font-size:24px; font-weight:700; }
+  .app-subtitle{ font-size:15px; opacity:.9; margin-top:4px; font-weight:400; }
+
+  function formaTag(forma){
+    var label = forma || 'Dinheiro';
+    var cls = label === 'Cartão' ? 'tag-cartao' : label === 'Pix' ? 'tag-pix' : 'tag-dinheiro';
+    var icon = label === 'Cartão' ? '💳' : label === 'Pix' ? '⚡' : '💵';
+    return '<span class="tag ' + cls + '">' + icon + ' ' + escapeHtml(label) + '</span>';
+  }
+
+  /* ===== TABS ===== */
+  .tabs{
+    max-width:1200px;
+    margin:24px auto 0;
+    padding:0 24px;
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .tab-btn{
+    font-size:15px;
+    font-weight:600;
+    padding:10px 20px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:#fff;
+    color:var(--text-light);
+    cursor:pointer;
+    transition:.2s ease;
+  }
+  .tab-btn:hover{ border-color:var(--primary); color:var(--primary); }
+  .tab-btn.active{ background:var(--primary); color:#fff; border-color:var(--primary); }
+
+  .container{ max-width:1200px; margin:0 auto; padding:32px 24px; }
+
+  /* ===== TYPOGRAPHY ===== */
+  .title{ font-size:24px; font-weight:700; }
+  .subtitle{ font-size:18px; font-weight:600; margin-bottom:16px; }
+  .label{ font-size:13px; font-weight:500; color:var(--text-light); display:block; margin-bottom:6px; }
+  .hint-text{ font-size:15px; color:var(--text-light); margin-bottom:16px; }
+
+  /* ===== CARD ===== */
+  .card{
+    background:var(--card);
+    border-radius:12px;
+    box-shadow:0 1px 3px rgba(0,0,0,.1);
+    padding:24px;
+    margin-bottom:32px;
+  }
+  .card-header-row{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:16px; flex-wrap:wrap; gap:8px;
+  }
+
+  /* ===== STATS ===== */
+  .stat-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:32px; }
+  .stat-card{ display:flex; flex-direction:column; gap:8px; }
+  .stat-card-inner{ background:var(--card-inner); border:1px solid var(--border); }
+  .stat-value{ font-size:24px; font-weight:700; color:var(--text); }
+  .stat-success{ color:var(--success-text); }
+  .stat-error{ color:var(--error-text); }
+
+  .total-badge{ font-size:15px; font-weight:600; padding:6px 14px; border-radius:8px; background:var(--table-head); }
+  .total-success{ background:var(--success-bg); color:var(--success-text); }
+  .total-error{ background:var(--error-bg); color:var(--error-text); }
+
+  /* ===== FORMS ===== */
+  .form-group{ margin-bottom:16px; }
+  .form-row{ display:grid; grid-template-columns:1fr 2fr 1fr; gap:16px; align-items:start; }
+  input[type=text], input[type=password], input[type=number], input[type=date], input[type=month]{
+    width:100%;
+    font-size:15px;
+    padding:12px 16px;
+    border:1px solid var(--input-border);
+    border-radius:8px;
+    transition:.2s ease;
+    color:var(--text);
+    background:#fff;
+  }
+  input:focus{ outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(232,93,156,.15); }
+  input.input-error{ border-color:var(--error-text); }
+  .error-message{ font-size:13px; color:var(--error-text); margin-top:4px; min-height:16px; }
+
+  /* ===== BUTTONS ===== */
+  .btn{
+    font-size:15px; font-weight:600; padding:12px 24px; border-radius:8px;
+    border:none; cursor:pointer; transition:.2s ease;
+  }
+  .btn-primary{ background:var(--primary); color:#fff; }
+  .btn-primary:hover{ background:var(--primary-dark); }
+  .btn-primary:disabled{ opacity:.5; cursor:not-allowed; }
+  .btn-outline{ background:#fff; color:var(--primary); border:1px solid var(--primary); }
+  .btn-outline:hover{ background:var(--primary); color:#fff; }
+  .btn-logout{ background:rgba(255,255,255,.18); color:#fff; border:1px solid rgba(255,255,255,.5); padding:8px 16px; font-size:13px; }
+  .btn-logout:hover{ background:rgba(255,255,255,.32); }
+  .btn-delete{ background:transparent; color:var(--error-text); border:1px solid var(--error-bg); padding:6px 12px; font-size:13px; border-radius:6px; cursor:pointer; transition:.2s ease; }
+  .btn-delete:hover{ background:var(--error-bg); }
+
+  /* ===== TABLE ===== */
+  .table-wrapper{ overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; }
+  thead th{ background:var(--table-head); text-align:left; padding:12px; font-size:13px; font-weight:600; color:var(--text); }
+  tbody td{ padding:12px; font-size:15px; border-bottom:1px solid var(--border); color:var(--text); }
+  tbody tr:hover{ background:rgba(232,93,156,.04); }
+  .empty-state{ text-align:center; color:var(--text-light); font-style:italic; padding:24px 0; }
+
+  .tag{ display:inline-block; padding:2px 10px; border-radius:6px; font-size:13px; font-weight:600; }
+  .tag-entrada{ background:var(--success-bg); color:var(--success-text); }
+  .tag-despesa{ background:var(--error-bg); color:var(--error-text); }
+
+  .success-banner{ background:var(--success-bg); color:var(--success-text); padding:16px; border-radius:8px; margin-top:16px; font-weight:600; }
+
+  .progress-outer{ width:100%; height:12px; background:var(--table-head); border-radius:8px; overflow:hidden; margin:12px 0; }
+  .progress-inner{ height:100%; background:linear-gradient(90deg, var(--primary), var(--secondary)); transition:.3s ease; border-radius:8px; }
+
+  .row-selected{ background:rgba(167,139,250,.14) !important; }
+
+
+  select {
+    width:100%;
+    font-size:15px;
+    font-family:inherit;
+    padding:12px 16px;
+    border:1px solid var(--input-border);
+    border-radius:8px;
+    transition:.2s ease;
+    color:var(--text);
+    background:#fff;
+    cursor:pointer;
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238B6F8C' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 14px center;
+  }
+  select:focus{ outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(232,93,156,.15); }
+  .tag-dinheiro{ background:#FEF9C3; color:#854D0E; }
+  .tag-cartao{ background:#EDE9FE; color:#5B21B6; }
+  .tag-pix{ background:#D1FAE5; color:#065F46; }
+
+  .print-only{ display:none; }
+
+  @media (max-width:768px){
+    .stat-grid{ grid-template-columns:1fr; }
+    .form-row{ grid-template-columns:1fr; }
+    .container{ padding:24px 16px; }
+  }
+
+  @media print{
+    body{ background:#fff; color:#000; }
+    #loginScreen, .app-header, .tabs, .no-print, .col-actions, .btn-delete{ display:none !important; }
+    .print-only{ display:block !important; }
+    .card{ box-shadow:none; border:1px solid #ddd; background:#fff; }
+    .container{ padding:0; max-width:100%; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===== LOGIN ===== -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="login-icon">💗</div>
+      <h1 class="title">Controle de Orçamento</h1>
+      <p class="subtitle-small">Entre para acessar suas contas</p>
+      <form id="loginForm" novalidate>
+        <div class="form-group" style="text-align:left;">
+          <label for="loginUser" class="label">Usuário</label>
+          <input type="text" id="loginUser" autocomplete="username" />
+          <div class="error-message" id="loginUserError"></div>
+        </div>
+        <div class="form-group" style="text-align:left;">
+          <label for="loginPass" class="label">Senha</label>
+          <input type="password" id="loginPass" autocomplete="current-password" />
+          <div class="error-message" id="loginPassError"></div>
+        </div>
+        <div class="error-message" id="loginGeneralError" style="text-align:center; margin-bottom:8px;"></div>
+        <button type="submit" class="btn btn-primary" style="width:100%;">Entrar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== APP ===== -->
+  <div id="appScreen" style="display:none;">
+    <header class="app-header">
+      <div class="header-content">
+        <div>
+          <h1 class="app-title">💗 Controle de Orçamento</h1>
+          <p class="app-subtitle">Acompanhe entradas, gastos e sua meta financeira</p>
+        </div>
+        <button id="logoutBtn" class="btn btn-logout">Sair</button>
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="saldo">Saldo</button>
+      <button class="tab-btn" data-tab="entrada">Entrada</button>
+      <button class="tab-btn" data-tab="despesa">Despesa</button>
+      <button class="tab-btn" data-tab="relatorio">Relatório Mensal</button>
+      <button class="tab-btn" data-tab="meta">Meta</button>
+    </nav>
+
+    <main class="container">
+
+      <div id="printHeader" class="print-only">
+        <h1 style="font-size:20px; font-weight:700; margin-bottom:4px;">Relatório de Orçamento</h1>
+        <p id="printHeaderDate" style="font-size:13px; color:#555; margin-bottom:16px;"></p>
+      </div>
+
+      <!-- SALDO -->
+      <section class="tab-content" id="tab-saldo">
+        <div class="stat-grid">
+          <div class="card stat-card">
+            <span class="label">Total de Entradas</span>
+            <span class="stat-value stat-success" id="statEntradas">R$ 0,00</span>
+          </div>
+          <div class="card stat-card">
+            <span class="label">Total de Despesas</span>
+            <span class="stat-value stat-error" id="statDespesas">R$ 0,00</span>
+          </div>
+          <div class="card stat-card">
+            <span class="label">Saldo Atual</span>
+            <span class="stat-value" id="statSaldo">R$ 0,00</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="subtitle">Sua Meta</h2>
+          <div id="metaContent"></div>
+        </div>
+
+        <button class="btn btn-outline" id="printSaldoBtn">🖨️ Gerar PDF</button>
+      </section>
+
+      <!-- ENTRADA -->
+      <section class="tab-content" id="tab-entrada" style="display:none;">
+        <div class="card no-print">
+          <h2 class="subtitle">Nova Entrada</h2>
+          <form id="entradaForm" novalidate>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="entradaData" class="label">Data</label>
+                <input type="date" id="entradaData" />
+                <div class="error-message" id="entradaDataError"></div>
+              </div>
+              <div class="form-group">
+                <label for="entradaDesc" class="label">Descrição</label>
+                <input type="text" id="entradaDesc" placeholder="Ex: Salário, Venda, Freelance" />
+                <div class="error-message" id="entradaDescError"></div>
+              </div>
+              <div class="form-group">
+                <label for="entradaValor" class="label">Valor (R$)</label>
+                <input type="number" id="entradaValor" step="0.01" min="0.01" placeholder="0,00" />
+                <div class="error-message" id="entradaValorError"></div>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">+ Adicionar Entrada</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-header-row">
+            <h2 class="subtitle" style="margin-bottom:0;">Lançamentos de Entrada</h2>
+            <span class="total-badge total-success" id="entradaTotalBadge">Total: R$ 0,00</span>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Data</th><th>Descrição</th><th>Valor</th><th class="col-actions"></th></tr></thead>
+              <tbody id="entradaTableBody"></tbody>
+            </table>
+          </div>
+          <p class="empty-state" id="entradaEmptyState" style="display:none;">Nenhuma entrada cadastrada ainda.</p>
+        </div>
+
+        <button class="btn btn-outline no-print" id="printEntradaBtn">🖨️ Gerar PDF</button>
+      </section>
+
+      <!-- DESPESA -->
+      <section class="tab-content" id="tab-despesa" style="display:none;">
+        <div class="card no-print">
+          <h2 class="subtitle">Nova Despesa</h2>
+          <form id="despesaForm" novalidate>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="despesaData" class="label">Data</label>
+                <input type="date" id="despesaData" />
+                <div class="error-message" id="despesaDataError"></div>
+              </div>
+              <div class="form-group">
+                <label for="despesaDesc" class="label">Descrição</label>
+                <input type="text" id="despesaDesc" placeholder="Ex: Mercado, Aluguel, Transporte" />
+                <div class="error-message" id="despesaDescError"></div>
+              </div>
+              <div class="form-group">
+                <label for="despesaValor" class="label">Valor (R$)</label>
+                <input type="number" id="despesaValor" step="0.01" min="0.01" placeholder="0,00" />
+                <div class="error-message" id="despesaValorError"></div>
+              </div>
+            </div>
+            <div class="form-group" style="max-width:280px;">
+              <label for="despesaForma" class="label">Forma de pagamento</label>
+              <select id="despesaForma">
+                <option value="Dinheiro">💵 Dinheiro</option>
+                <option value="Cartão">💳 Cartão</option>
+                <option value="Pix">⚡ Pix</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">+ Adicionar Despesa</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-header-row">
+            <h2 class="subtitle" style="margin-bottom:0;">Lançamentos de Despesa</h2>
+            <span class="total-badge total-error" id="despesaTotalBadge">Total: R$ 0,00</span>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Data</th><th>Descrição</th><th>Forma</th><th>Valor</th><th class="col-actions"></th></tr></thead>
+              <tbody id="despesaTableBody"></tbody>
+            </table>
+          </div>
+          <p class="empty-state" id="despesaEmptyState" style="display:none;">Nenhuma despesa cadastrada ainda.</p>
+        </div>
+
+        <button class="btn btn-outline no-print" id="printDespesaBtn">🖨️ Gerar PDF</button>
+      </section>
+
+      <!-- RELATÓRIO MENSAL -->
+      <section class="tab-content" id="tab-relatorio" style="display:none;">
+        <div class="card">
+          <h2 class="subtitle">Relatório Mensal</h2>
+          <div class="form-group no-print" style="max-width:220px;">
+            <label for="relatorioMes" class="label">Escolha o mês</label>
+            <input type="month" id="relatorioMes" />
+          </div>
+          <p class="print-only" id="relatorioMesPrintLabel"></p>
+
+          <div class="stat-grid" style="margin-top:16px; margin-bottom:0;">
+            <div class="card stat-card stat-card-inner" style="margin-bottom:0;">
+              <span class="label">Entradas do mês</span>
+              <span class="stat-value stat-success" id="relEntradas">R$ 0,00</span>
+            </div>
+            <div class="card stat-card stat-card-inner" style="margin-bottom:0;">
+              <span class="label">Despesas do mês</span>
+              <span class="stat-value stat-error" id="relDespesas">R$ 0,00</span>
+            </div>
+            <div class="card stat-card stat-card-inner" style="margin-bottom:0;">
+              <span class="label">Saldo do mês</span>
+              <span class="stat-value" id="relSaldo">R$ 0,00</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="subtitle" id="relatorioListaTitulo">Lançamentos do mês</h2>
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Forma</th><th>Valor</th></tr></thead>
+              <tbody id="relatorioTableBody"></tbody>
+            </table>
+          </div>
+          <p class="empty-state" id="relatorioEmptyState" style="display:none;">Nenhum lançamento neste mês.</p>
+        </div>
+
+        <div class="card">
+          <h2 class="subtitle">Comparar Meses Anteriores</h2>
+          <p class="hint-text no-print">Clique em um mês da lista para ver os detalhes dele acima.</p>
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Mês</th><th>Entradas</th><th>Despesas</th><th>Saldo</th></tr></thead>
+              <tbody id="resumoMensalTableBody"></tbody>
+            </table>
+          </div>
+          <p class="empty-state" id="resumoMensalEmptyState" style="display:none;">Ainda não há lançamentos suficientes para comparar meses.</p>
+        </div>
+
+        <button class="btn btn-outline no-print" id="printRelatorioBtn">🖨️ Gerar PDF</button>
+      </section>
+
+      <!-- META -->
+      <section class="tab-content" id="tab-meta" style="display:none;">
+        <div class="card">
+          <h2 class="subtitle">Definir Meta de Saldo</h2>
+          <p class="hint-text">Qual valor de saldo positivo você gostaria de alcançar?</p>
+          <form id="metaForm" novalidate>
+            <div class="form-group" style="max-width:280px;">
+              <label for="metaValor" class="label">Valor da Meta (R$)</label>
+              <input type="number" id="metaValor" step="0.01" min="0.01" placeholder="0,00" />
+              <div class="error-message" id="metaValorError"></div>
+            </div>
+            <button type="submit" class="btn btn-primary">Salvar Meta</button>
+          </form>
+          <div class="success-banner" id="metaSuccessBanner" style="display:none;">Meta salva com sucesso!</div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+
+  var LS_ENTRADAS = 'mariana_orcamento_entradas';
+  var LS_DESPESAS = 'mariana_orcamento_despesas';
+  var LS_META = 'mariana_orcamento_meta';
+  var SS_LOGIN = 'mariana_orcamento_logged_in';
+
+  var entradas = [];
+  var despesas = [];
+  var meta = 0;
+
+  function loadData(){
+    try{
+      var e = localStorage.getItem(LS_ENTRADAS);
+      entradas = e ? JSON.parse(e) : [];
+      if(!Array.isArray(entradas)) entradas = [];
+    }catch(err){ console.error('Erro ao carregar entradas', err); entradas = []; }
+
+    try{
+      var d = localStorage.getItem(LS_DESPESAS);
+      despesas = d ? JSON.parse(d) : [];
+      if(!Array.isArray(despesas)) despesas = [];
+    }catch(err){ console.error('Erro ao carregar despesas', err); despesas = []; }
+
+    try{
+      var m = localStorage.getItem(LS_META);
+      meta = m ? parseFloat(m) : 0;
+      if(isNaN(meta)) meta = 0;
+    }catch(err){ console.error('Erro ao carregar meta', err); meta = 0; }
+  }
+
+  function saveEntradas(){
+    try{ localStorage.setItem(LS_ENTRADAS, JSON.stringify(entradas)); }
+    catch(err){ console.error(err); alert('Não foi possível salvar os dados no navegador.'); }
+  }
+  function saveDespesas(){
+    try{ localStorage.setItem(LS_DESPESAS, JSON.stringify(despesas)); }
+    catch(err){ console.error(err); alert('Não foi possível salvar os dados no navegador.'); }
+  }
+  function saveMeta(){
+    try{ localStorage.setItem(LS_META, String(meta)); }
+    catch(err){ console.error(err); alert('Não foi possível salvar a meta.'); }
+  }
+
+  function formatCurrency(v){
+    return (v || 0).toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+  }
+  function formatDateBR(iso){
+    if(!iso) return '';
+    var parts = iso.split('-');
+    return parts[2] + '/' + parts[1] + '/' + parts[0];
+  }
+  function genId(){
+    return 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2,9);
+  }
+  function sumValues(arr){
+    return arr.reduce(function(acc, it){ return acc + it.value; }, 0);
+  }
+  function escapeHtml(str){
+    var div = document.createElement('div');
+    div.textContent = str == null ? '' : String(str);
+    return div.innerHTML;
+  }
+  function setError(inputEl, errId, msg){
+    inputEl.classList.add('input-error');
+    document.getElementById(errId).textContent = msg;
+  }
+  function clearError(inputEl, errId){
+    inputEl.classList.remove('input-error');
+    document.getElementById(errId).textContent = '';
+  }
+  function toggleEmpty(emptyId, isEmpty, wrapperEl){
+    document.getElementById(emptyId).style.display = isEmpty ? 'block' : 'none';
+    if(wrapperEl) wrapperEl.style.display = isEmpty ? 'none' : 'block';
+  }
+
+  var MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  function monthLabel(ym){
+    var parts = ym.split('-');
+    return MESES[parseInt(parts[1],10)-1] + ' de ' + parts[0];
+  }
+  function currentYm(){
+    var now = new Date();
+    return now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  }
+
+  function formaTag(forma){
+    var label = forma || 'Dinheiro';
+    var cls = label === 'Cartão' ? 'tag-cartao' : label === 'Pix' ? 'tag-pix' : 'tag-dinheiro';
+    var icon = label === 'Cartão' ? '💳' : label === 'Pix' ? '⚡' : '💵';
+    return '<span class="tag ' + cls + '">' + icon + ' ' + escapeHtml(label) + '</span>';
+  }
+
+  /* ===== TABS ===== */
+  function showTab(name){
+    document.querySelectorAll('.tab-content').forEach(function(el){
+      el.style.display = (el.id === 'tab-' + name) ? 'block' : 'none';
+    });
+    document.querySelectorAll('.tab-btn').forEach(function(btn){
+      btn.classList.toggle('active', btn.getAttribute('data-tab') === name);
+    });
+    if(name === 'relatorio'){ renderRelatorio(); }
+    if(name === 'meta'){ renderMetaTab(); }
+  }
+  document.querySelectorAll('.tab-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){ showTab(btn.getAttribute('data-tab')); });
+  });
+
+  /* ===== SALDO ===== */
+  function renderSaldo(){
+    var totalEntradas = sumValues(entradas);
+    var totalDespesas = sumValues(despesas);
+    var saldo = totalEntradas - totalDespesas;
+
+    document.getElementById('statEntradas').textContent = formatCurrency(totalEntradas);
+    document.getElementById('statDespesas').textContent = formatCurrency(totalDespesas);
+    var statSaldoEl = document.getElementById('statSaldo');
+    statSaldoEl.textContent = formatCurrency(saldo);
+    statSaldoEl.className = 'stat-value ' + (saldo >= 0 ? 'stat-success' : 'stat-error');
+
+    var metaContent = document.getElementById('metaContent');
+    if(meta > 0){
+      var pct = Math.max(0, Math.min(100, (saldo/meta)*100));
+      var html = '';
+      if(saldo >= meta){
+        html += '<div class="success-banner">🎉 Parabéns! Você atingiu sua meta de ' + formatCurrency(meta) + '!</div>';
+      } else {
+        var falta = meta - saldo;
+        html += '<p class="hint-text" style="margin-bottom:8px;">Meta: <strong>' + formatCurrency(meta) + '</strong> &middot; Faltam <strong>' + formatCurrency(falta) + '</strong> para alcançar</p>';
+      }
+      html += '<div class="progress-outer"><div class="progress-inner" style="width:' + pct + '%;"></div></div>';
+      metaContent.innerHTML = html;
+    } else {
+      metaContent.innerHTML = '<p class="hint-text">Nenhuma meta definida ainda. Vá até a aba <strong>Meta</strong> para cadastrar uma.</p>';
+    }
+  }
+
+  /* ===== ENTRADA / DESPESA TABLES ===== */
+  function renderEntradaTable(){
+    var tbody = document.getElementById('entradaTableBody');
+    var sorted = entradas.slice().sort(function(a,b){ return b.date.localeCompare(a.date); });
+    tbody.innerHTML = sorted.map(function(it){
+      return '<tr><td>' + formatDateBR(it.date) + '</td><td>' + escapeHtml(it.desc) + '</td><td>' + formatCurrency(it.value) + '</td><td class="col-actions"><button class="btn-delete" data-id="' + it.id + '">Excluir</button></td></tr>';
+    }).join('');
+    document.getElementById('entradaTotalBadge').textContent = 'Total: ' + formatCurrency(sumValues(entradas));
+    toggleEmpty('entradaEmptyState', entradas.length === 0, tbody.closest('.table-wrapper'));
+  }
+
+  function renderDespesaTable(){
+    var tbody = document.getElementById('despesaTableBody');
+    var sorted = despesas.slice().sort(function(a,b){ return b.date.localeCompare(a.date); });
+    tbody.innerHTML = sorted.map(function(it){
+      return '<tr><td>' + formatDateBR(it.date) + '</td><td>' + escapeHtml(it.desc) + '</td><td>' + formaTag(it.forma) + '</td><td>' + formatCurrency(it.value) + '</td><td class="col-actions"><button class="btn-delete" data-id="' + it.id + '">Excluir</button></td></tr>';
+    }).join('');
+    document.getElementById('despesaTotalBadge').textContent = 'Total: ' + formatCurrency(sumValues(despesas));
+    toggleEmpty('despesaEmptyState', despesas.length === 0, tbody.closest('.table-wrapper'));
+  }
+
+  document.getElementById('entradaTableBody').addEventListener('click', function(e){
+    if(e.target.classList.contains('btn-delete')){
+      var id = e.target.getAttribute('data-id');
+      if(confirm('Tem certeza que deseja excluir este lançamento?')){
+        entradas = entradas.filter(function(it){ return it.id !== id; });
+        saveEntradas();
+        renderAll();
+      }
+    }
+  });
+  document.getElementById('despesaTableBody').addEventListener('click', function(e){
+    if(e.target.classList.contains('btn-delete')){
+      var id = e.target.getAttribute('data-id');
+      if(confirm('Tem certeza que deseja excluir este lançamento?')){
+        despesas = despesas.filter(function(it){ return it.id !== id; });
+        saveDespesas();
+        renderAll();
+      }
+    }
+  });
+
+  /* ===== FORMS: ENTRADA / DESPESA ===== */
+  document.getElementById('entradaForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var dataEl = document.getElementById('entradaData');
+    var descEl = document.getElementById('entradaDesc');
+    var valorEl = document.getElementById('entradaValor');
+    clearError(dataEl, 'entradaDataError');
+    clearError(descEl, 'entradaDescError');
+    clearError(valorEl, 'entradaValorError');
+
+    var valid = true;
+    if(!dataEl.value){ setError(dataEl, 'entradaDataError', 'Escolha uma data.'); valid = false; }
+    if(!descEl.value.trim()){ setError(descEl, 'entradaDescError', 'Escreva uma descrição.'); valid = false; }
+    var valor = parseFloat(valorEl.value);
+    if(!valorEl.value || isNaN(valor) || valor <= 0){ setError(valorEl, 'entradaValorError', 'Informe um valor maior que zero.'); valid = false; }
+    if(!valid) return;
+
+    entradas.push({ id: genId(), date: dataEl.value, desc: descEl.value.trim(), value: valor });
+    saveEntradas();
+    this.reset();
+    renderAll();
+  });
+
+  document.getElementById('despesaForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var dataEl = document.getElementById('despesaData');
+    var descEl = document.getElementById('despesaDesc');
+    var valorEl = document.getElementById('despesaValor');
+    var formaEl = document.getElementById('despesaForma');
+    clearError(dataEl, 'despesaDataError');
+    clearError(descEl, 'despesaDescError');
+    clearError(valorEl, 'despesaValorError');
+
+    var valid = true;
+    if(!dataEl.value){ setError(dataEl, 'despesaDataError', 'Escolha uma data.'); valid = false; }
+    if(!descEl.value.trim()){ setError(descEl, 'despesaDescError', 'Escreva uma descrição.'); valid = false; }
+    var valor = parseFloat(valorEl.value);
+    if(!valorEl.value || isNaN(valor) || valor <= 0){ setError(valorEl, 'despesaValorError', 'Informe um valor maior que zero.'); valid = false; }
+    if(!valid) return;
+
+    despesas.push({ id: genId(), date: dataEl.value, desc: descEl.value.trim(), value: valor, forma: formaEl.value });
+    saveDespesas();
+    this.reset();
+    renderAll();
+  });
+
+  /* ===== META ===== */
+  function renderMetaTab(){
+    var valorEl = document.getElementById('metaValor');
+    valorEl.value = meta > 0 ? meta : '';
+  }
+
+  document.getElementById('metaForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var valorEl = document.getElementById('metaValor');
+    clearError(valorEl, 'metaValorError');
+    var valor = parseFloat(valorEl.value);
+    if(!valorEl.value || isNaN(valor) || valor <= 0){ setError(valorEl, 'metaValorError', 'Informe um valor maior que zero.'); return; }
+
+    meta = valor;
+    saveMeta();
+    var banner = document.getElementById('metaSuccessBanner');
+    banner.style.display = 'block';
+    setTimeout(function(){ banner.style.display = 'none'; }, 3000);
+    renderAll();
+  });
+
+  /* ===== RELATÓRIO MENSAL ===== */
+  var relatorioMesInput = document.getElementById('relatorioMes');
+
+  function renderRelatorio(){
+    if(!relatorioMesInput.value){ relatorioMesInput.value = currentYm(); }
+    renderRelatorioDetalhe();
+    renderResumoMensal();
+  }
+
+  function renderRelatorioDetalhe(){
+    var ym = relatorioMesInput.value || currentYm();
+    var itensEntrada = entradas.filter(function(it){ return it.date.slice(0,7) === ym; }).map(function(it){
+      return { date: it.date, desc: it.desc, value: it.value, tipo: 'Entrada' };
+    });
+    var itensDespesa = despesas.filter(function(it){ return it.date.slice(0,7) === ym; }).map(function(it){
+      return { date: it.date, desc: it.desc, value: it.value, tipo: 'Despesa', forma: it.forma };
+    });
+    var totalE = sumValues(itensEntrada);
+    var totalD = sumValues(itensDespesa);
+    var saldoMes = totalE - totalD;
+
+    document.getElementById('relEntradas').textContent = formatCurrency(totalE);
+    document.getElementById('relDespesas').textContent = formatCurrency(totalD);
+    var relSaldoEl = document.getElementById('relSaldo');
+    relSaldoEl.textContent = formatCurrency(saldoMes);
+    relSaldoEl.className = 'stat-value ' + (saldoMes >= 0 ? 'stat-success' : 'stat-error');
+
+    var todos = itensEntrada.concat(itensDespesa).sort(function(a,b){ return a.date.localeCompare(b.date); });
+    var tbody = document.getElementById('relatorioTableBody');
+    tbody.innerHTML = todos.map(function(it){
+      var tagClass = it.tipo === 'Entrada' ? 'tag-entrada' : 'tag-despesa';
+      var formaCol = it.tipo === 'Despesa' ? formaTag(it.forma) : '<span style="color:var(--text-light);font-size:13px;">—</span>';
+      return '<tr><td>' + formatDateBR(it.date) + '</td><td><span class="tag ' + tagClass + '">' + it.tipo + '</span></td><td>' + escapeHtml(it.desc) + '</td><td>' + formaCol + '</td><td>' + formatCurrency(it.value) + '</td></tr>';
+    }).join('');
+    toggleEmpty('relatorioEmptyState', todos.length === 0, tbody.closest('.table-wrapper'));
+
+    document.getElementById('relatorioListaTitulo').textContent = 'Lançamentos de ' + monthLabel(ym);
+    document.getElementById('relatorioMesPrintLabel').textContent = 'Mês selecionado: ' + monthLabel(ym);
+  }
+
+  function renderResumoMensal(){
+    var map = {};
+    entradas.forEach(function(it){
+      var ym = it.date.slice(0,7);
+      if(!map[ym]) map[ym] = { e:0, d:0 };
+      map[ym].e += it.value;
+    });
+    despesas.forEach(function(it){
+      var ym = it.date.slice(0,7);
+      if(!map[ym]) map[ym] = { e:0, d:0 };
+      map[ym].d += it.value;
+    });
+    var meses = Object.keys(map).sort(function(a,b){ return b.localeCompare(a); });
+    var selected = relatorioMesInput.value;
+    var tbody = document.getElementById('resumoMensalTableBody');
+    tbody.innerHTML = meses.map(function(ym){
+      var saldoMes = map[ym].e - map[ym].d;
+      var rowClass = ym === selected ? 'row-selected' : '';
+      return '<tr class="' + rowClass + '" data-ym="' + ym + '" style="cursor:pointer;"><td>' + monthLabel(ym) + '</td><td>' + formatCurrency(map[ym].e) + '</td><td>' + formatCurrency(map[ym].d) + '</td><td>' + formatCurrency(saldoMes) + '</td></tr>';
+    }).join('');
+    toggleEmpty('resumoMensalEmptyState', meses.length === 0, tbody.closest('.table-wrapper'));
+  }
+
+  document.getElementById('resumoMensalTableBody').addEventListener('click', function(e){
+    var row = e.target.closest('tr');
+    if(row && row.getAttribute('data-ym')){
+      relatorioMesInput.value = row.getAttribute('data-ym');
+      renderRelatorioDetalhe();
+      renderResumoMensal();
+    }
+  });
+
+  relatorioMesInput.addEventListener('change', function(){
+    renderRelatorioDetalhe();
+    renderResumoMensal();
+  });
+
+  /* ===== IMPRESSÃO / PDF ===== */
+  function setupPrintButton(btnId){
+    var btn = document.getElementById(btnId);
+    if(!btn) return;
+    btn.addEventListener('click', function(){
+      var now = new Date();
+      var dataStr = formatDateBR(now.toISOString().slice(0,10)) + ' às ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+      document.getElementById('printHeaderDate').textContent = 'Gerado em ' + dataStr;
+      window.print();
+    });
+  }
+  ['printSaldoBtn','printEntradaBtn','printDespesaBtn','printRelatorioBtn'].forEach(setupPrintButton);
+
+  /* ===== RENDER ALL ===== */
+  function renderAll(){
+    renderSaldo();
+    renderEntradaTable();
+    renderDespesaTable();
+    renderMetaTab();
+    renderRelatorio();
+  }
+
+  /* ===== LOGIN / LOGOUT ===== */
+  document.getElementById('loginForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var userEl = document.getElementById('loginUser');
+    var passEl = document.getElementById('loginPass');
+    var genErr = document.getElementById('loginGeneralError');
+    clearError(userEl, 'loginUserError');
+    clearError(passEl, 'loginPassError');
+    genErr.textContent = '';
+
+    var valid = true;
+    if(!userEl.value.trim()){ setError(userEl, 'loginUserError', 'Informe o usuário.'); valid = false; }
+    if(!passEl.value){ setError(passEl, 'loginPassError', 'Informe a senha.'); valid = false; }
+    if(!valid) return;
+
+    if(userEl.value.trim() === 'marianasantana' && passEl.value === '31052021'){
+      try{ sessionStorage.setItem(SS_LOGIN, 'true'); }catch(err){ console.error(err); }
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appScreen').style.display = 'block';
+      loadData();
+      renderAll();
+    } else {
+      genErr.textContent = 'Usuário ou senha incorretos.';
+      passEl.value = '';
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', function(){
+    try{ sessionStorage.removeItem(SS_LOGIN); }catch(err){ console.error(err); }
+    document.getElementById('appScreen').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('loginForm').reset();
+  });
+
+  /* ===== BOOTSTRAP ===== */
+  document.addEventListener('DOMContentLoaded', function(){
+    loadData();
+    var logged = false;
+    try{ logged = sessionStorage.getItem(SS_LOGIN) === 'true'; }catch(err){ logged = false; }
+    if(logged){
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appScreen').style.display = 'block';
+      renderAll();
+    } else {
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('appScreen').style.display = 'none';
+    }
+  });
+})();
+</script>
+</body>
+</html>

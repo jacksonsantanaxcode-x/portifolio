@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cronograma de Estudos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cor-fundo: #000000;
+    --cor-card: #232838;
+    --cor-card-clara: #2f3650;
+    --cor-input-fundo: #1a1e2b;
+    --cor-texto: #eceff4;
+    --cor-texto-secundario: #97a0b5;
+    --cor-primaria: #2c3e6b;
+    --cor-primaria-hover: #233155;
+    --cor-sucesso: #4caf7d;
+    --cor-sucesso-fundo: #15261d;
+    --cor-erro: #e0685f;
+    --cor-erro-fundo: #2c1817;
+    --cor-alerta: #e3b341;
+    --cor-alerta-fundo: #2e2410;
+    --cor-borda: #3c445c;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--cor-fundo);
+    color: var(--cor-texto);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 32px 20px; }
+
+  .titulo { font-size: 24px; font-weight: 700; margin: 0; }
+  .subtitulo { font-size: 18px; font-weight: 600; margin: 0 0 16px; }
+  .label { font-size: 13px; font-weight: 500; color: var(--cor-texto-secundario); display: block; margin-bottom: 6px; }
+  .texto-secundario { color: var(--cor-texto-secundario); font-size: 14px; margin: 0; }
+
+  /* Card */
+  .card {
+    background: var(--cor-card);
+    border: 1px solid var(--cor-borda);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.4);
+    padding: 24px;
+  }
+
+  /* Botões */
+  .btn {
+    border-radius: 8px;
+    padding: 12px 24px;
+    border: none;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s ease;
+  }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-primario { background: var(--cor-primaria); color: #fff; }
+  .btn-primario:hover:not(:disabled) { background: var(--cor-primaria-hover); }
+  .btn-secundario { background: transparent; color: var(--cor-texto); border: 1px solid var(--cor-borda); }
+  .btn-secundario:hover:not(:disabled) { background: var(--cor-card-clara); }
+  .btn-perigo { background: transparent; color: var(--cor-erro); border: 1px solid var(--cor-erro); }
+  .btn-perigo:hover:not(:disabled) { background: var(--cor-erro-fundo); }
+  .btn-pequeno { padding: 8px 14px; font-size: 13px; }
+  .btn-link { background: none; border: none; color: var(--cor-texto-secundario); text-decoration: underline; cursor: pointer; font-size: 13px; font-family: inherit; padding: 0; }
+  .btn-link:hover { color: var(--cor-texto); }
+
+  /* Campos */
+  .grupo-campo { margin-bottom: 16px; }
+  .input, textarea.input {
+    width: 100%;
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    padding: 12px 16px;
+    background: var(--cor-input-fundo);
+    color: var(--cor-texto);
+    font-family: inherit;
+    font-size: 15px;
+    transition: .2s ease;
+  }
+  .input:focus { outline: none; border-color: var(--cor-primaria); }
+  .grupo-campo.erro .input { border-color: var(--cor-erro); }
+  .erro-campo { color: var(--cor-erro); font-size: 13px; margin: 6px 0 0; display: none; }
+  .grupo-campo.erro .erro-campo { display: block; }
+  textarea.input { resize: vertical; min-height: 70px; }
+
+  .chk-mostrar { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--cor-texto-secundario); margin: -8px 0 16px; cursor: pointer; }
+
+  /* Badges */
+  .badge { font-size: 13px; font-weight: 500; padding: 4px 12px; border-radius: 999px; display: inline-block; white-space: nowrap; }
+  .badge-sucesso { background: var(--cor-sucesso-fundo); color: var(--cor-sucesso); }
+  .badge-pendente { background: var(--cor-card-clara); color: var(--cor-texto-secundario); }
+  .badge-erro { background: var(--cor-erro-fundo); color: var(--cor-erro); }
+  .badge-alerta { background: var(--cor-alerta-fundo); color: var(--cor-alerta); }
+
+  /* Login */
+  #tela-login { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .login-caixa { max-width: 400px; width: 100%; }
+  .login-logo { font-size: 40px; text-align: center; margin-bottom: 8px; }
+  .login-titulo { font-size: 22px; font-weight: 700; text-align: center; margin: 0 0 4px; }
+  .login-subtitulo { text-align: center; color: var(--cor-texto-secundario); font-size: 14px; margin: 0 0 24px; }
+
+  /* App */
+  #tela-app { display: none; }
+  .cabecalho { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 32px; }
+  .cabecalho-data { color: var(--cor-texto-secundario); font-size: 14px; margin: 4px 0 0; text-transform: capitalize; }
+
+  .abas { display: flex; gap: 8px; border-bottom: 1px solid var(--cor-borda); margin-bottom: 32px; overflow-x: auto; }
+  .aba-btn { background: none; border: none; color: var(--cor-texto-secundario); padding: 12px 20px; font-size: 15px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; transition: .2s ease; font-family: inherit; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .aba-btn.ativa { color: var(--cor-texto); border-bottom-color: var(--cor-primaria); }
+  .aba-conteudo { display: none; }
+  .aba-conteudo.ativa { display: block; }
+
+  .form-linha { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+  .form-linha .grupo-campo { flex: 1; min-width: 180px; }
+  .form-acoes { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
+
+  .secao-margem { margin-top: 32px; }
+
+  .barra-filtros { display: flex; gap: 8px; flex-wrap: wrap; }
+  .filtro-btn { background: transparent; border: 1px solid var(--cor-borda); color: var(--cor-texto-secundario); padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 500; cursor: pointer; transition: .2s ease; font-family: inherit; }
+  .filtro-btn.ativo { background: var(--cor-primaria); color: #fff; border-color: var(--cor-primaria); }
+
+  .lista-acoes-topo { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+
+  .item-lista { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--cor-borda); flex-wrap: wrap; }
+  .item-lista:last-child { border-bottom: none; }
+  .item-titulo { font-weight: 600; font-size: 15px; margin: 0 0 4px; }
+  .item-data { color: var(--cor-texto-secundario); font-size: 13px; margin: 0; }
+  .item-anotacao { color: var(--cor-texto-secundario); font-size: 13px; margin: 6px 0 0; font-style: italic; }
+  .item-acoes { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+  .vazio { text-align: center; padding: 40px 20px; color: var(--cor-texto-secundario); }
+  .vazio-emoji { font-size: 32px; margin-bottom: 8px; }
+
+  .banner-alerta { background: var(--cor-alerta-fundo); border: 1px solid var(--cor-alerta); color: var(--cor-alerta); border-radius: 8px; padding: 16px; margin-bottom: 24px; font-size: 14px; }
+  .banner-alerta strong { display: block; margin-bottom: 4px; }
+
+  .toast { position: fixed; bottom: 24px; right: 24px; left: 24px; margin: 0 auto; max-width: 320px; background: var(--cor-card); border: 1px solid var(--cor-borda); color: var(--cor-texto); padding: 14px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,.5); font-size: 14px; z-index: 999; animation: entrarToast .2s ease; }
+  @keyframes entrarToast { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  @media (max-width: 768px) {
+    .item-lista { flex-direction: column; align-items: flex-start; }
+    .item-acoes { width: 100%; }
+    .cabecalho { flex-direction: column; }
+    .container { padding: 20px 16px; }
+  }
+
+  @media print {
+    body { background: #fff !important; color: #000 !important; }
+    .abas, .form-card, .item-acoes, .barra-filtros, .btn, .cabecalho-acoes, .chk-mostrar, .banner-alerta { display: none !important; }
+    .card { background: #fff !important; color: #000 !important; box-shadow: none !important; border: 1px solid #ccc !important; }
+    .item-lista { border-bottom: 1px solid #ccc !important; }
+    .badge { background: #eee !important; color: #000 !important; border: 1px solid #999; }
+    .item-data, .texto-secundario, .item-anotacao { color: #333 !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="tela-login">
+  <div class="login-caixa">
+    <div class="card">
+      <div class="login-logo">📚</div>
+      <p class="login-titulo">Cronograma de Estudos</p>
+      <p class="login-subtitulo">Organize seus estudos e suas provas em um só lugar.</p>
+
+      <form id="form-entrar-senha">
+        <div class="grupo-campo" id="grupo-usuarioEntrar">
+          <label class="label" for="usuarioEntrar">Usuário</label>
+          <input type="text" id="usuarioEntrar" class="input" placeholder="Seu usuário" autocomplete="username">
+          <p class="erro-campo"></p>
+        </div>
+        <div class="grupo-campo" id="grupo-senhaEntrar">
+          <label class="label" for="senhaEntrar">Senha</label>
+          <input type="password" id="senhaEntrar" class="input" placeholder="Sua senha" autocomplete="current-password">
+          <p class="erro-campo"></p>
+        </div>
+        <label class="chk-mostrar"><input type="checkbox" data-toggle="senhaEntrar"> Mostrar senha</label>
+        <button type="submit" class="btn btn-primario" style="width:100%;">Entrar</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="tela-app">
+  <div class="container">
+    <div class="cabecalho">
+      <div>
+        <p class="titulo">Olá! 👋</p>
+        <p class="cabecalho-data" id="dataAtual"></p>
+      </div>
+      <div class="cabecalho-acoes">
+        <button class="btn btn-secundario btn-pequeno" id="btnSair">Sair</button>
+      </div>
+    </div>
+
+    <div class="abas">
+      <button class="aba-btn ativa" data-aba="estudos">📖 Estudos</button>
+      <button class="aba-btn" data-aba="provas">📝 Provas <span id="indicadorAlertaProva" style="display:none; color:var(--cor-alerta); font-size:11px;">●</span></button>
+    </div>
+
+    <div class="aba-conteudo ativa" id="aba-estudos">
+      <div class="card form-card">
+        <p class="subtitulo" id="tituloFormEstudo">Adicionar sessão de estudo</p>
+        <form id="form-estudo">
+          <input type="hidden" id="estudoEditId">
+          <div class="form-linha">
+            <div class="grupo-campo" id="grupo-tituloMateria">
+              <label class="label" for="tituloMateria">Matéria / assunto</label>
+              <input type="text" id="tituloMateria" class="input" placeholder="Ex: Matemática - funções">
+              <p class="erro-campo"></p>
+            </div>
+            <div class="grupo-campo" id="grupo-dataHoraInicio">
+              <label class="label" for="dataHoraInicio">Data e hora de início</label>
+              <input type="datetime-local" id="dataHoraInicio" class="input">
+              <p class="erro-campo"></p>
+            </div>
+          </div>
+          <div class="grupo-campo" id="grupo-anotacoesEstudo">
+            <label class="label" for="anotacoesEstudo">Anotações (opcional)</label>
+            <textarea id="anotacoesEstudo" class="input" placeholder="Ex: revisar resumo, fazer exercícios do capítulo 4..."></textarea>
+          </div>
+          <div class="form-acoes">
+            <button type="submit" class="btn btn-primario" id="btnSalvarEstudo">Adicionar sessão</button>
+            <button type="button" class="btn btn-secundario" id="btnCancelarEdicaoEstudo" style="display:none;">Cancelar edição</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="secao-margem">
+        <div class="lista-acoes-topo">
+          <div class="barra-filtros" id="filtrosEstudo">
+            <button class="filtro-btn ativo" data-filtro="todos">Todos</button>
+            <button class="filtro-btn" data-filtro="pendentes">Pendentes</button>
+            <button class="filtro-btn" data-filtro="concluidos">Concluídos</button>
+          </div>
+          <button class="btn btn-secundario btn-pequeno" id="btnImprimirEstudos">🖨️ Imprimir</button>
+        </div>
+        <div class="card" id="listaEstudos"></div>
+      </div>
+    </div>
+
+    <div class="aba-conteudo" id="aba-provas">
+      <div id="bannerAlertasProvas"></div>
+
+      <div class="card form-card">
+        <p class="subtitulo" id="tituloFormProva">Adicionar prova</p>
+        <form id="form-prova">
+          <input type="hidden" id="provaEditId">
+          <div class="form-linha">
+            <div class="grupo-campo" id="grupo-nomeProva">
+              <label class="label" for="nomeProva">Nome da prova</label>
+              <input type="text" id="nomeProva" class="input" placeholder="Ex: Prova de Biologia - 2ª unidade">
+              <p class="erro-campo"></p>
+            </div>
+            <div class="grupo-campo" id="grupo-dataHoraProva">
+              <label class="label" for="dataHoraProva">Data e hora da prova</label>
+              <input type="datetime-local" id="dataHoraProva" class="input">
+              <p class="erro-campo"></p>
+            </div>
+          </div>
+          <div class="grupo-campo" id="grupo-anotacoesProva">
+            <label class="label" for="anotacoesProva">Anotações (opcional)</label>
+            <textarea id="anotacoesProva" class="input" placeholder="Ex: levar calculadora, revisar capítulos 3 a 5..."></textarea>
+          </div>
+          <div class="form-acoes">
+            <button type="submit" class="btn btn-primario" id="btnSalvarProva">Adicionar prova</button>
+            <button type="button" class="btn btn-secundario" id="btnCancelarEdicaoProva" style="display:none;">Cancelar edição</button>
+            <button type="button" class="btn btn-secundario" id="btnAtivarAvisos">🔔 Ativar avisos do navegador</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="secao-margem">
+        <div class="lista-acoes-topo">
+          <p class="texto-secundario">Provas cadastradas, da mais próxima pra mais distante.</p>
+          <button class="btn btn-secundario btn-pequeno" id="btnImprimirProvas">🖨️ Imprimir</button>
+        </div>
+        <div class="card" id="listaProvas"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const $ = (id) => document.getElementById(id);
+
+  const LOGIN_USUARIO = 'JacksonSantana';
+  const LOGIN_SENHA = '29041988';
+  const LS_ESTUDOS = 'cronograma_estudos';
+  const LS_PROVAS = 'cronograma_provas';
+  const SS_LOGADO = 'cronograma_logado';
+
+  function uid() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return 'id-' + Date.now() + '-' + Math.floor(Math.random() * 100000);
+  }
+
+  function escapeHTML(str) {
+    return String(str)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+  }
+
+  function formatarDataHora(dataStr) {
+    const d = new Date(dataStr);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+
+  function mostrarErro(idCampo, mensagem) {
+    const grupo = $(idCampo).closest('.grupo-campo');
+    grupo.classList.add('erro');
+    grupo.querySelector('.erro-campo').textContent = mensagem;
+  }
+
+  function limparErro(idCampo) {
+    $(idCampo).closest('.grupo-campo').classList.remove('erro');
+  }
+
+  function mostrarToast(texto) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = texto;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+  }
+
+  function lerLista(chave) {
+    try {
+      const dados = localStorage.getItem(chave);
+      return dados ? JSON.parse(dados) : [];
+    } catch (e) {
+      console.error('Erro ao ler dados salvos:', e);
+      return [];
+    }
+  }
+
+  function salvarLista(chave, lista) {
+    try {
+      localStorage.setItem(chave, JSON.stringify(lista));
+      return true;
+    } catch (e) {
+      console.error('Erro ao salvar dados:', e);
+      mostrarToast('Não foi possível salvar. Verifique o espaço disponível no navegador.');
+      return false;
+    }
+  }
+
+  const getEstudos = () => lerLista(LS_ESTUDOS);
+  const salvarEstudos = (lista) => salvarLista(LS_ESTUDOS, lista);
+  const getProvas = () => lerLista(LS_PROVAS);
+  const salvarProvas = (lista) => salvarLista(LS_PROVAS, lista);
+
+  // ===== LOGIN =====
+  $('form-entrar-senha').addEventListener('submit', function(e) {
+    e.preventDefault();
+    limparErro('usuarioEntrar'); limparErro('senhaEntrar');
+    const usuario = $('usuarioEntrar').value.trim();
+    const senha = $('senhaEntrar').value;
+    let valido = true;
+    if (usuario !== LOGIN_USUARIO) { mostrarErro('usuarioEntrar', 'Usuário incorreto.'); valido = false; }
+    if (senha !== LOGIN_SENHA) { mostrarErro('senhaEntrar', 'Senha incorreta.'); valido = false; }
+    if (!valido) return;
+    sessionStorage.setItem(SS_LOGADO, 'true');
+    entrarNoApp();
+  });
+
+  $('btnSair').addEventListener('click', function() {
+    sessionStorage.removeItem(SS_LOGADO);
+    location.reload();
+  });
+
+  function entrarNoApp() {
+    $('tela-login').style.display = 'none';
+    $('tela-app').style.display = 'block';
+    atualizarCabecalho();
+    renderEstudos();
+    renderProvas();
+    verificarAlertasProvas();
+    setInterval(verificarAlertasProvas, 60000);
+  }
+
+  function atualizarCabecalho() {
+    const hoje = new Date();
+    $('dataAtual').textContent = hoje.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  document.querySelectorAll('.chk-mostrar input[type=checkbox]').forEach((chk) => {
+    chk.addEventListener('change', function() {
+      this.getAttribute('data-toggle').split(',').forEach((id) => {
+        const el = $(id.trim());
+        if (el) el.type = this.checked ? 'text' : 'password';
+      });
+    });
+  });
+
+  // ===== NAVEGAÇÃO ENTRE ABAS =====
+  document.querySelectorAll('.aba-btn').forEach((btn) => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.aba-btn').forEach((b) => b.classList.remove('ativa'));
+      document.querySelectorAll('.aba-conteudo').forEach((c) => c.classList.remove('ativa'));
+      this.classList.add('ativa');
+      $('aba-' + this.dataset.aba).classList.add('ativa');
+    });
+  });
+
+  // ===== ESTUDOS =====
+  let filtroEstudoAtual = 'todos';
+
+  document.querySelectorAll('#filtrosEstudo .filtro-btn').forEach((btn) => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('#filtrosEstudo .filtro-btn').forEach((b) => b.classList.remove('ativo'));
+      this.classList.add('ativo');
+      filtroEstudoAtual = this.dataset.filtro;
+      renderEstudos();
+    });
+  });
+
+  $('form-estudo').addEventListener('submit', function(e) {
+    e.preventDefault();
+    limparErro('tituloMateria'); limparErro('dataHoraInicio');
+    const titulo = $('tituloMateria').value.trim();
+    const dataHora = $('dataHoraInicio').value;
+    const anotacoes = $('anotacoesEstudo').value.trim();
+    let valido = true;
+    if (!titulo) { mostrarErro('tituloMateria', 'Escreva o nome da matéria ou assunto.'); valido = false; }
+    if (!dataHora) { mostrarErro('dataHoraInicio', 'Escolha a data e a hora do estudo.'); valido = false; }
+    if (!valido) return;
+
+    const editId = $('estudoEditId').value;
+    let lista = getEstudos();
+    if (editId) {
+      lista = lista.map((item) => item.id === editId ? { ...item, titulo_materia: titulo, data_hora_inicio: dataHora, anotacoes: anotacoes } : item);
+    } else {
+      lista.push({ id: uid(), titulo_materia: titulo, data_hora_inicio: dataHora, anotacoes: anotacoes, status: false });
+    }
+    salvarEstudos(lista);
+    const eraEdicao = !!editId;
+    cancelarEdicaoEstudo();
+    renderEstudos();
+    mostrarToast(eraEdicao ? 'Sessão de estudo atualizada!' : 'Sessão de estudo adicionada!');
+  });
+
+  $('btnCancelarEdicaoEstudo').addEventListener('click', cancelarEdicaoEstudo);
+
+  function cancelarEdicaoEstudo() {
+    $('form-estudo').reset();
+    $('estudoEditId').value = '';
+    $('tituloFormEstudo').textContent = 'Adicionar sessão de estudo';
+    $('btnSalvarEstudo').textContent = 'Adicionar sessão';
+    $('btnCancelarEdicaoEstudo').style.display = 'none';
+    limparErro('tituloMateria'); limparErro('dataHoraInicio');
+  }
+
+  function editarEstudo(id) {
+    const item = getEstudos().find((e) => e.id === id);
+    if (!item) return;
+    $('estudoEditId').value = item.id;
+    $('tituloMateria').value = item.titulo_materia;
+    $('dataHoraInicio').value = item.data_hora_inicio;
+    $('anotacoesEstudo').value = item.anotacoes || '';
+    $('tituloFormEstudo').textContent = 'Editar sessão de estudo';
+    $('btnSalvarEstudo').textContent = 'Salvar alteração';
+    $('btnCancelarEdicaoEstudo').style.display = 'inline-block';
+    $('form-estudo').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function excluirEstudo(id) {
+    const item = getEstudos().find((e) => e.id === id);
+    if (!item) return;
+    const ok = confirm('Excluir a sessão "' + item.titulo_materia + '"? Essa ação não pode ser desfeita.');
+    if (!ok) return;
+    salvarEstudos(getEstudos().filter((e) => e.id !== id));
+    renderEstudos();
+  }
+
+  function toggleStatusEstudo(id) {
+    const lista = getEstudos().map((item) => item.id === id ? { ...item, status: !item.status } : item);
+    salvarEstudos(lista);
+    renderEstudos();
+  }
+
+  function renderEstudos() {
+    let lista = getEstudos().slice().sort((a, b) => new Date(a.data_hora_inicio) - new Date(b.data_hora_inicio));
+    const agora = new Date();
+
+    if (filtroEstudoAtual === 'pendentes') lista = lista.filter((i) => !i.status);
+    if (filtroEstudoAtual === 'concluidos') lista = lista.filter((i) => i.status);
+
+    const container = $('listaEstudos');
+    if (lista.length === 0) {
+      container.innerHTML = '<div class="vazio"><div class="vazio-emoji">📖</div><p>Nenhuma sessão de estudo aqui ainda.<br>Adicione a primeira ali em cima!</p></div>';
+      return;
+    }
+
+    container.innerHTML = lista.map((item) => {
+      let badge;
+      if (item.status) {
+        badge = '<span class="badge badge-sucesso">Concluído</span>';
+      } else if (new Date(item.data_hora_inicio) < agora) {
+        badge = '<span class="badge badge-erro">Atrasado</span>';
+      } else {
+        badge = '<span class="badge badge-pendente">Pendente</span>';
+      }
+      const anotacaoEstudo = item.anotacoes ? '<p class="item-anotacao">📌 ' + escapeHTML(item.anotacoes) + '</p>' : '';
+      return '<div class="item-lista">' +
+          '<div>' +
+            '<p class="item-titulo">' + escapeHTML(item.titulo_materia) + '</p>' +
+            '<p class="item-data">' + formatarDataHora(item.data_hora_inicio) + '</p>' +
+            anotacaoEstudo +
+          '</div>' +
+          '<div class="item-acoes">' +
+            badge +
+            '<button class="btn btn-secundario btn-pequeno" data-acao="toggle" data-id="' + item.id + '">' + (item.status ? 'Marcar pendente' : 'Marcar concluído') + '</button>' +
+            '<button class="btn btn-secundario btn-pequeno" data-acao="editar" data-id="' + item.id + '">Editar</button>' +
+            '<button class="btn btn-perigo btn-pequeno" data-acao="excluir" data-id="' + item.id + '">Excluir</button>' +
+          '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  $('listaEstudos').addEventListener('click', function(e) {
+    const btn = e.target.closest('button[data-acao]');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    if (btn.dataset.acao === 'toggle') toggleStatusEstudo(id);
+    if (btn.dataset.acao === 'editar') editarEstudo(id);
+    if (btn.dataset.acao === 'excluir') excluirEstudo(id);
+  });
+
+  $('btnImprimirEstudos').addEventListener('click', () => window.print());
+
+  // ===== PROVAS =====
+  $('form-prova').addEventListener('submit', function(e) {
+    e.preventDefault();
+    limparErro('nomeProva'); limparErro('dataHoraProva');
+    const nome = $('nomeProva').value.trim();
+    const dataHora = $('dataHoraProva').value;
+    const anotacoes = $('anotacoesProva').value.trim();
+    let valido = true;
+    if (!nome) { mostrarErro('nomeProva', 'Escreva o nome da prova.'); valido = false; }
+    if (!dataHora) { mostrarErro('dataHoraProva', 'Escolha a data e a hora da prova.'); valido = false; }
+    if (!valido) return;
+
+    const editId = $('provaEditId').value;
+    let lista = getProvas();
+    if (editId) {
+      lista = lista.map((item) => item.id === editId
+        ? { ...item, nome_prova: nome, data_hora_prova: dataHora, anotacoes: anotacoes, notificacao_enviada: false }
+        : item);
+    } else {
+      lista.push({ id: uid(), nome_prova: nome, data_hora_prova: dataHora, anotacoes: anotacoes, notificacao_enviada: false });
+    }
+    salvarProvas(lista);
+    const eraEdicao = !!editId;
+    cancelarEdicaoProva();
+    renderProvas();
+    verificarAlertasProvas();
+    mostrarToast(eraEdicao ? 'Prova atualizada!' : 'Prova adicionada!');
+  });
+
+  $('btnCancelarEdicaoProva').addEventListener('click', cancelarEdicaoProva);
+
+  function cancelarEdicaoProva() {
+    $('form-prova').reset();
+    $('provaEditId').value = '';
+    $('tituloFormProva').textContent = 'Adicionar prova';
+    $('btnSalvarProva').textContent = 'Adicionar prova';
+    $('btnCancelarEdicaoProva').style.display = 'none';
+    limparErro('nomeProva'); limparErro('dataHoraProva');
+  }
+
+  function editarProva(id) {
+    const item = getProvas().find((p) => p.id === id);
+    if (!item) return;
+    $('provaEditId').value = item.id;
+    $('nomeProva').value = item.nome_prova;
+    $('dataHoraProva').value = item.data_hora_prova;
+    $('anotacoesProva').value = item.anotacoes || '';
+    $('tituloFormProva').textContent = 'Editar prova';
+    $('btnSalvarProva').textContent = 'Salvar alteração';
+    $('btnCancelarEdicaoProva').style.display = 'inline-block';
+    $('form-prova').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function excluirProva(id) {
+    const item = getProvas().find((p) => p.id === id);
+    if (!item) return;
+    const ok = confirm('Excluir a prova "' + item.nome_prova + '"? Essa ação não pode ser desfeita.');
+    if (!ok) return;
+    salvarProvas(getProvas().filter((p) => p.id !== id));
+    renderProvas();
+    verificarAlertasProvas();
+  }
+
+  function calcularContagem(dataStr) {
+    const diffMs = new Date(dataStr) - new Date();
+    if (diffMs <= 0) return { texto: 'A prova já passou', classe: 'badge-pendente' };
+    const diffMin = Math.floor(diffMs / 60000);
+    const dias = Math.floor(diffMin / 1440);
+    const horas = Math.floor((diffMin % 1440) / 60);
+    const minutos = diffMin % 60;
+    if (diffMs <= 24 * 60 * 60 * 1000) {
+      const partes = [];
+      if (horas > 0) partes.push(horas + 'h');
+      partes.push(minutos + 'min');
+      return { texto: 'Faltam ' + partes.join(' e ') + ' — é amanhã ou hoje!', classe: 'badge-alerta' };
+    }
+    return { texto: 'Faltam ' + dias + (dias !== 1 ? ' dias' : ' dia'), classe: 'badge-pendente' };
+  }
+
+  function renderProvas() {
+    const lista = getProvas().slice().sort((a, b) => new Date(a.data_hora_prova) - new Date(b.data_hora_prova));
+    const container = $('listaProvas');
+    if (lista.length === 0) {
+      container.innerHTML = '<div class="vazio"><div class="vazio-emoji">📝</div><p>Nenhuma prova cadastrada ainda.<br>Adicione a data da sua próxima prova ali em cima!</p></div>';
+      return;
+    }
+    container.innerHTML = lista.map((item) => {
+      const contagem = calcularContagem(item.data_hora_prova);
+      const anotacoesHTML = item.anotacoes ? '<p class="item-anotacao">📌 ' + escapeHTML(item.anotacoes) + '</p>' : '';
+      return '<div class="item-lista">' +
+          '<div>' +
+            '<p class="item-titulo">' + escapeHTML(item.nome_prova) + '</p>' +
+            '<p class="item-data">' + formatarDataHora(item.data_hora_prova) + '</p>' +
+            anotacoesHTML +
+          '</div>' +
+          '<div class="item-acoes">' +
+            '<span class="badge ' + contagem.classe + '">' + contagem.texto + '</span>' +
+            '<button class="btn btn-secundario btn-pequeno" data-acao="editar" data-id="' + item.id + '">Editar</button>' +
+            '<button class="btn btn-perigo btn-pequeno" data-acao="excluir" data-id="' + item.id + '">Excluir</button>' +
+          '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  $('listaProvas').addEventListener('click', function(e) {
+    const btn = e.target.closest('button[data-acao]');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    if (btn.dataset.acao === 'editar') editarProva(id);
+    if (btn.dataset.acao === 'excluir') excluirProva(id);
+  });
+
+  $('btnImprimirProvas').addEventListener('click', () => window.print());
+
+  // ===== NOTIFICAÇÕES =====
+  $('btnAtivarAvisos').addEventListener('click', function() {
+    if (!('Notification' in window)) {
+      mostrarToast('Esse navegador não tem suporte a avisos. Os alertas continuam aparecendo aqui dentro do app.');
+      return;
+    }
+    Notification.requestPermission().then((permissao) => {
+      if (permissao === 'granted') {
+        mostrarToast('Avisos ativados! Você vai receber um aviso 1 dia antes de cada prova, enquanto esse navegador estiver aberto.');
+      } else {
+        mostrarToast('Avisos não foram ativados. Os alertas continuam aparecendo aqui dentro do app, na lista de provas.');
+      }
+    });
+  });
+
+  function verificarAlertasProvas() {
+    const provas = getProvas();
+    const agora = new Date();
+    const proximas = provas.filter((p) => {
+      const diffMs = new Date(p.data_hora_prova) - agora;
+      return diffMs > 0 && diffMs <= 24 * 60 * 60 * 1000;
+    });
+
+    const banner = $('bannerAlertasProvas');
+    if (proximas.length > 0) {
+      banner.innerHTML = '<div class="banner-alerta"><strong>🔔 Prova chegando!</strong>' +
+        proximas.map((p) => escapeHTML(p.nome_prova)).join(', ') + ' — é em menos de 24 horas.</div>';
+    } else {
+      banner.innerHTML = '';
+    }
+    $('indicadorAlertaProva').style.display = proximas.length > 0 ? 'inline' : 'none';
+
+    let alterou = false;
+    const listaAtualizada = provas.map((p) => {
+      const diffMs = new Date(p.data_hora_prova) - agora;
+      if (diffMs > 0 && diffMs <= 24 * 60 * 60 * 1000 && !p.notificacao_enviada) {
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification('📚 Prova chegando!', { body: p.nome_prova + ' é em menos de 24 horas.' });
+        }
+        alterou = true;
+        return { ...p, notificacao_enviada: true };
+      }
+      return p;
+    });
+    if (alterou) salvarProvas(listaAtualizada);
+  }
+
+  // ===== INICIALIZAÇÃO =====
+  let logado = false;
+  try { logado = sessionStorage.getItem(SS_LOGADO) === 'true'; } catch (e) { logado = false; }
+
+  if (logado) {
+    entrarNoApp();
+  }
+  // tela de login já está visível por padrão
+})();
+</script>
+</body>
+</html>

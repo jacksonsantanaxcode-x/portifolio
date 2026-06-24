@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Gestão de Lavanderia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F4F7F8;
+    --card:#FFFFFF;
+    --text:#1F2937;
+    --text-light:#6B7280;
+    --primary:#0E5A6B;
+    --primary-dark:#0A4450;
+    --success:#1E9E5A;
+    --success-bg:#E7F8EE;
+    --error:#DC2626;
+    --error-bg:#FDECEC;
+    --border:#E5E7EB;
+    --warn-bg:#FFF7E6;
+    --warn:#B45309;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+  .app-layout{
+    display:flex;
+    min-height:100vh;
+  }
+
+  /* Sidebar */
+  .sidebar{
+    width:260px;
+    flex-shrink:0;
+    background:var(--card);
+    border-right:1px solid var(--border);
+    padding:24px 16px;
+    position:sticky;
+    top:0;
+    height:100vh;
+    overflow-y:auto;
+  }
+  .sidebar-logo{
+    display:flex;align-items:center;gap:12px;margin-bottom:8px;padding:0 8px;
+  }
+  .sidebar-logo .logo-badge{
+    width:40px;height:40px;border-radius:10px;background:var(--primary);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;
+    flex-shrink:0;
+  }
+  .sidebar-logo h1{font-size:18px;font-weight:700;color:var(--primary-dark);}
+  .sidebar-logo .sub{font-size:12px;color:var(--text-light);font-weight:500;}
+  .sidebar nav{
+    margin-top:28px;display:flex;flex-direction:column;gap:4px;
+  }
+  .sidebar nav button{
+    display:flex;align-items:center;gap:12px;
+    text-align:left;width:100%;
+    padding:12px 14px;border:none;background:transparent;border-radius:8px;
+    font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:var(--text-light);
+    cursor:pointer;transition:.2s ease;
+  }
+  .sidebar nav button .tab-icon{font-size:17px;}
+  .sidebar nav button.active{background:var(--primary);color:#fff;}
+  .sidebar nav button:not(.active):hover{background:var(--bg);color:var(--text);}
+  .sidebar-print{margin-top:24px;padding:0 8px;}
+
+  .main-content{
+    flex:1;
+    padding:24px 32px 60px;
+    min-width:0;
+  }
+
+  @media(max-width:900px){
+    .app-layout{flex-direction:column;}
+    .sidebar{
+      width:100%;height:auto;position:relative;
+      border-right:none;border-bottom:1px solid var(--border);
+      padding:16px;
+    }
+    .sidebar nav{
+      flex-direction:row;flex-wrap:wrap;margin-top:16px;
+    }
+    .sidebar nav button{width:auto;flex:1;min-width:140px;justify-content:center;}
+    .main-content{padding:20px 16px 60px;}
+  }
+
+  .wrap{max-width:1200px;margin:0 auto;}
+
+  .screen{display:none;}
+  .screen.active{display:block;animation:fade .2s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  .card{
+    background:var(--card);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.1);
+    padding:24px;margin-bottom:24px;
+  }
+  .card h2{font-size:18px;font-weight:600;margin-bottom:16px;color:var(--primary-dark);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+  @media(max-width:768px){.grid2,.grid3{grid-template-columns:1fr;}}
+
+  label{display:block;font-size:13px;font-weight:500;color:var(--text-light);margin-bottom:6px;}
+  input,select,textarea{
+    width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:8px;
+    font-family:'Inter',sans-serif;font-size:15px;color:var(--text);
+    background:#fff;transition:.2s ease;
+  }
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);}
+  input.error,select.error{border-color:var(--error);}
+  .error-msg{color:var(--error);font-size:13px;margin-top:4px;display:none;}
+  .error-msg.show{display:block;}
+  .field{margin-bottom:16px;}
+
+  .btn{
+    padding:12px 24px;border:none;border-radius:8px;font-family:'Inter',sans-serif;
+    font-size:15px;font-weight:600;cursor:pointer;transition:.2s ease;
+    display:inline-flex;align-items:center;gap:8px;
+  }
+  .btn-primary{background:var(--primary);color:#fff;}
+  .btn-primary:hover{background:var(--primary-dark);}
+  .btn-secondary{background:var(--bg);color:var(--text);border:1px solid var(--border);}
+  .btn-secondary:hover{background:#E9EDEE;}
+  .btn-success{background:var(--success);color:#fff;}
+  .btn-success:hover{background:#17824A;}
+  .btn-danger{background:var(--error-bg);color:var(--error);}
+  .btn-danger:hover{background:#FBD5D5;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .btn-sm{padding:8px 14px;font-size:13px;}
+  .btn-block{width:100%;justify-content:center;}
+
+  table{width:100%;border-collapse:collapse;}
+  thead th{
+    background:#F3F4F6;text-align:left;padding:12px 16px;font-size:13px;
+    font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:.03em;
+  }
+  thead th:first-child{border-radius:8px 0 0 8px;}
+  thead th:last-child{border-radius:0 8px 8px 0;}
+  tbody td{padding:14px 16px;font-size:15px;border-bottom:1px solid var(--border);}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:#FAFBFC;}
+
+  .badge{
+    display:inline-block;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;
+  }
+  .badge-recebido{background:#E0E7FF;color:#4338CA;}
+  .badge-lavando{background:#DBEAFE;color:#1D4ED8;}
+  .badge-secando{background:#FEF3C7;color:#B45309;}
+  .badge-passando{background:#FCE7F3;color:#BE185D;}
+  .badge-pronto{background:var(--success-bg);color:var(--success);}
+  .badge-entregue{background:#E5E7EB;color:#374151;}
+
+  .item-row{
+    display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:12px;align-items:end;
+    margin-bottom:12px;padding-bottom:12px;border-bottom:1px dashed var(--border);
+  }
+  @media(max-width:768px){.item-row{grid-template-columns:1fr;}}
+  .item-row .remove-item{
+    background:var(--error-bg);color:var(--error);border:none;border-radius:8px;
+    width:40px;height:40px;cursor:pointer;font-size:18px;transition:.2s ease;
+  }
+  .item-row .remove-item:hover{background:#FBD5D5;}
+
+  .total-box{
+    display:flex;justify-content:space-between;align-items:center;
+    background:var(--bg);padding:16px 24px;border-radius:8px;margin-top:16px;
+  }
+  .total-box .label{font-size:15px;font-weight:600;color:var(--text-light);}
+  .total-box .value{font-size:24px;font-weight:700;color:var(--primary-dark);}
+
+  .success-card{
+    background:var(--success-bg);border:1px solid #BBE8CE;border-radius:12px;
+    padding:24px;text-align:center;
+  }
+  .success-card h3{color:var(--success);font-size:20px;margin-bottom:8px;}
+
+  .search-bar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+  .search-bar input,.search-bar select{flex:1;min-width:160px;}
+
+  .status-track{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+  .status-track button{
+    padding:8px 16px;border-radius:20px;border:1px solid var(--border);
+    background:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;
+    color:var(--text-light);cursor:pointer;transition:.2s ease;
+  }
+  .status-track button.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+
+  .os-card{
+    background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;
+    margin-bottom:12px;transition:.2s ease;
+  }
+  .os-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.08);}
+  .os-card-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+  .os-code{font-size:16px;font-weight:700;color:var(--primary-dark);}
+  .os-client{font-size:14px;color:var(--text-light);margin-top:2px;}
+  .os-meta{display:flex;gap:20px;font-size:13px;color:var(--text-light);margin-bottom:14px;flex-wrap:wrap;}
+  .os-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+  .empty-state{text-align:center;padding:48px 24px;color:var(--text-light);}
+  .empty-state .icon{font-size:40px;margin-bottom:12px;}
+
+  .modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);
+    align-items:center;justify-content:center;z-index:100;padding:16px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal{
+    background:#fff;border-radius:12px;padding:32px;max-width:520px;width:100%;
+    max-height:85vh;overflow-y:auto;
+  }
+  .modal h3{font-size:18px;margin-bottom:16px;color:var(--primary-dark);}
+  .modal-close{float:right;background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);}
+  .detail-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;}
+  .detail-row:last-child{border-bottom:none;}
+  .detail-row span:first-child{color:var(--text-light);}
+  .detail-row span:last-child{font-weight:600;}
+
+  .obs-textarea{min-height:60px;resize:vertical;}
+
+  @media print{
+    .sidebar, .btn, .no-print{display:none !important;}
+    .main-content{padding:0;}
+    .app-layout{display:block;}
+    body{background:#fff;color:#000;}
+    .card{box-shadow:none;border:1px solid #ccc;}
+  }
+</style>
+</head>
+<body>
+<div class="app-layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-badge">🧺</div>
+      <div>
+        <h1>Lavanderia Express</h1>
+        <div class="sub">Sistema de Gestão</div>
+      </div>
+    </div>
+
+    <nav>
+      <button class="active" data-tab="pdv"><span class="tab-icon">📝</span> Nova OS (Balcão)</button>
+      <button data-tab="rastreio"><span class="tab-icon">🔄</span> Acompanhamento</button>
+      <button data-tab="historico"><span class="tab-icon">📜</span> Histórico</button>
+      <button data-tab="insumos"><span class="tab-icon">🧴</span> Insumos</button>
+      <button data-tab="delivery"><span class="tab-icon">🛵</span> Delivery</button>
+      <button data-tab="assinaturas"><span class="tab-icon">💎</span> Assinaturas</button>
+    </nav>
+
+    <div class="sidebar-print">
+      <button class="btn btn-secondary btn-block no-print" onclick="window.print()">🖨️ Imprimir</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+  <div class="wrap">
+
+  <!-- TELA 1: NOVA OS -->
+  <div class="screen active" id="screen-pdv">
+    <div class="card">
+      <h2>Dados do Cliente</h2>
+      <div class="grid2">
+        <div class="field">
+          <label for="cli-nome">Nome do cliente *</label>
+          <input type="text" id="cli-nome" placeholder="Ex: Maria Silva">
+          <div class="error-msg" id="err-cli-nome">Informe o nome do cliente.</div>
+        </div>
+        <div class="field">
+          <label for="cli-tel">Telefone *</label>
+          <input type="text" id="cli-tel" placeholder="Ex: (21) 99999-0000">
+          <div class="error-msg" id="err-cli-tel">Informe o telefone do cliente.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Itens do Pedido</h2>
+      <div id="items-container"></div>
+      <button class="btn btn-secondary btn-sm" onclick="addItemRow()">+ Adicionar item</button>
+      <div class="error-msg" id="err-items">Adicione ao menos um item ao pedido.</div>
+
+      <div class="total-box">
+        <span class="label">Total do pedido</span>
+        <span class="value" id="total-display">R$ 0,00</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Observações Gerais (manchas, danos prévios)</h2>
+      <div class="field">
+        <textarea class="obs-textarea" id="os-obs" placeholder="Ex: Camisa azul com mancha de café na manga. Calça com bainha desfiada."></textarea>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-block" onclick="finalizarOS()">✅ Finalizar e Gerar OS</button>
+
+    <div id="os-success" style="display:none;margin-top:24px;"></div>
+  </div>
+
+  <!-- TELA 2: RASTREIO -->
+  <div class="screen" id="screen-rastreio">
+    <div class="card">
+      <h2>Filtrar por status</h2>
+      <div class="status-track" id="status-filter">
+        <button class="active" data-status="todos">Todos</button>
+        <button data-status="Recebido">Recebido</button>
+        <button data-status="Lavando">Lavando</button>
+        <button data-status="Secando">Secando</button>
+        <button data-status="Passando">Passando</button>
+        <button data-status="Pronto">Pronto</button>
+      </div>
+      <div class="search-bar">
+        <input type="text" id="busca-rastreio" placeholder="Buscar por cliente ou código da OS..." oninput="renderRastreio()">
+      </div>
+    </div>
+    <div id="rastreio-list"></div>
+  </div>
+
+  <!-- TELA 3: HISTÓRICO -->
+  <div class="screen" id="screen-historico">
+    <div class="card">
+      <h2>Consultar Pedidos</h2>
+      <div class="search-bar">
+        <input type="text" id="busca-historico" placeholder="Buscar por cliente, código ou data..." oninput="renderHistorico()">
+        <select id="filtro-status-hist" onchange="renderHistorico()">
+          <option value="todos">Todos os status</option>
+          <option value="Recebido">Recebido</option>
+          <option value="Lavando">Lavando</option>
+          <option value="Secando">Secando</option>
+          <option value="Passando">Passando</option>
+          <option value="Pronto">Pronto</option>
+          <option value="Entregue">Entregue</option>
+        </select>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th><th>Cliente</th><th>Data</th><th>Itens</th><th>Total</th><th>Status</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="historico-tbody"></tbody>
+      </table>
+      <div class="empty-state" id="historico-empty" style="display:none;">
+        <div class="icon">📭</div>
+        <div>Nenhuma OS encontrada.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TELA 4: INSUMOS -->
+  <div class="screen" id="screen-insumos">
+
+    <div class="card">
+      <h2>Cadastrar Novo Insumo</h2>
+      <div class="grid3">
+        <div class="field">
+          <label for="ins-nome">Nome do insumo *</label>
+          <input type="text" id="ins-nome" placeholder="Ex: Sabão líquido">
+          <div class="error-msg" id="err-ins-nome">Informe o nome do insumo.</div>
+        </div>
+        <div class="field">
+          <label for="ins-unidade">Unidade de medida *</label>
+          <select id="ins-unidade">
+            <option value="litro">Litro (L)</option>
+            <option value="kg">Quilo (kg)</option>
+            <option value="un">Unidade (un)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="ins-custo">Custo por unidade (R$) *</label>
+          <input type="number" id="ins-custo" step="0.01" min="0" placeholder="Ex: 8.50">
+          <div class="error-msg" id="err-ins-custo">Informe um custo válido.</div>
+        </div>
+      </div>
+      <div class="grid3">
+        <div class="field">
+          <label for="ins-estoque">Estoque atual *</label>
+          <input type="number" id="ins-estoque" step="0.1" min="0" placeholder="Ex: 50">
+          <div class="error-msg" id="err-ins-estoque">Informe o estoque atual.</div>
+        </div>
+        <div class="field">
+          <label for="ins-minimo">Estoque mínimo (ponto de reposição) *</label>
+          <input type="number" id="ins-minimo" step="0.1" min="0" placeholder="Ex: 10">
+          <div class="error-msg" id="err-ins-minimo">Informe o estoque mínimo.</div>
+        </div>
+        <div class="field">
+          <label for="ins-consumo-ciclo">Consumo médio por ciclo de lavagem *</label>
+          <input type="number" id="ins-consumo-ciclo" step="0.01" min="0" placeholder="Ex: 0.15">
+          <div class="error-msg" id="err-ins-consumo-ciclo">Informe o consumo por ciclo.</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="cadastrarInsumo()">+ Cadastrar Insumo</button>
+    </div>
+
+    <div class="card" id="alertas-estoque-card" style="display:none;">
+      <h2>⚠️ Alertas de Estoque Baixo</h2>
+      <div id="alertas-estoque-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Estoque Atual</h2>
+      <div class="search-bar">
+        <input type="text" id="busca-insumo" placeholder="Buscar insumo..." oninput="renderInsumos()">
+      </div>
+      <div id="insumos-list"></div>
+      <div class="empty-state" id="insumos-empty" style="display:none;">
+        <div class="icon">🧴</div>
+        <div>Nenhum insumo cadastrado ainda.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Registrar Consumo Manual / Reposição de Estoque</h2>
+      <div class="grid3">
+        <div class="field">
+          <label for="mov-insumo">Insumo *</label>
+          <select id="mov-insumo"></select>
+        </div>
+        <div class="field">
+          <label for="mov-tipo">Tipo de movimento *</label>
+          <select id="mov-tipo">
+            <option value="entrada">Entrada (compra/reposição)</option>
+            <option value="saida">Saída (consumo manual)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="mov-qtd">Quantidade *</label>
+          <input type="number" id="mov-qtd" step="0.1" min="0" placeholder="Ex: 5">
+          <div class="error-msg" id="err-mov-qtd">Informe uma quantidade válida.</div>
+        </div>
+      </div>
+      <button class="btn btn-secondary" onclick="registrarMovimento()">Registrar Movimento</button>
+    </div>
+
+    <div class="card">
+      <h2>📊 Custo de Insumos por Ciclo Processado</h2>
+      <p style="font-size:13px;color:var(--text-light);margin-bottom:16px;">Estimativa baseada no consumo médio configurado por insumo e no total de OS já processadas (status "Lavando" ou posterior).</p>
+      <div class="total-box">
+        <span class="label">Custo total estimado de insumos (todas as OS)</span>
+        <span class="value" id="custo-total-insumos">R$ 0,00</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TELA 5: DELIVERY -->
+  <div class="screen" id="screen-delivery">
+
+    <div class="card">
+      <h2>Agendar Coleta ou Entrega</h2>
+      <div class="grid3">
+        <div class="field">
+          <label for="del-os">OS vinculada *</label>
+          <select id="del-os"></select>
+          <div class="error-msg" id="err-del-os">Selecione uma OS válida.</div>
+        </div>
+        <div class="field">
+          <label for="del-tipo">Tipo *</label>
+          <select id="del-tipo">
+            <option value="coleta">Coleta (buscar no cliente)</option>
+            <option value="entrega">Entrega (levar ao cliente)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="del-janela">Janela de horário *</label>
+          <input type="text" id="del-janela" placeholder="Ex: 14h às 16h">
+          <div class="error-msg" id="err-del-janela">Informe a janela de horário.</div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="del-endereco">Endereço *</label>
+        <input type="text" id="del-endereco" placeholder="Ex: Rua das Flores, 123 - Centro">
+        <div class="error-msg" id="err-del-endereco">Informe o endereço.</div>
+      </div>
+      <button class="btn btn-primary" onclick="agendarDelivery()">+ Agendar</button>
+    </div>
+
+    <div class="card">
+      <h2>Rotas do Dia</h2>
+      <div class="status-track" id="del-status-filter">
+        <button class="active" data-status="todos">Todas</button>
+        <button data-status="Agendado">Agendado</button>
+        <button data-status="A caminho">A caminho</button>
+        <button data-status="Entregue">Concluído</button>
+      </div>
+      <div id="delivery-list"></div>
+      <div class="empty-state" id="delivery-empty" style="display:none;">
+        <div class="icon">🛵</div>
+        <div>Nenhuma rota agendada neste filtro.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📨 Log de Notificações Automáticas ao Cliente</h2>
+      <p style="font-size:13px;color:var(--text-light);margin-bottom:16px;">Simulação das mensagens que seriam enviadas via WhatsApp/SMS em cada mudança de status.</p>
+      <div id="notif-log"></div>
+      <div class="empty-state" id="notif-empty" style="display:none;">
+        <div class="icon">💬</div>
+        <div>Nenhuma notificação enviada ainda.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TELA 6: ASSINATURAS -->
+  <div class="screen" id="screen-assinaturas">
+
+    <div class="card">
+      <h2>Cadastrar Plano</h2>
+      <div class="grid3">
+        <div class="field">
+          <label for="plano-nome">Nome do plano *</label>
+          <input type="text" id="plano-nome" placeholder="Ex: Plano Família">
+          <div class="error-msg" id="err-plano-nome">Informe o nome do plano.</div>
+        </div>
+        <div class="field">
+          <label for="plano-preco">Preço mensal (R$) *</label>
+          <input type="number" id="plano-preco" step="0.01" min="0" placeholder="Ex: 149.90">
+          <div class="error-msg" id="err-plano-preco">Informe um preço válido.</div>
+        </div>
+        <div class="field">
+          <label for="plano-franquia-kg">Franquia de quilos/mês *</label>
+          <input type="number" id="plano-franquia-kg" step="0.1" min="0" placeholder="Ex: 20">
+          <div class="error-msg" id="err-plano-franquia-kg">Informe a franquia de quilos.</div>
+        </div>
+      </div>
+      <div class="grid3">
+        <div class="field">
+          <label for="plano-franquia-pecas">Franquia de peças/mês</label>
+          <input type="number" id="plano-franquia-pecas" step="1" min="0" placeholder="Ex: 5 (opcional)">
+        </div>
+        <div class="field">
+          <label for="plano-excedente-kg">Preço do kg excedente (R$) *</label>
+          <input type="number" id="plano-excedente-kg" step="0.01" min="0" placeholder="Ex: 9.90">
+          <div class="error-msg" id="err-plano-excedente-kg">Informe o preço do excedente.</div>
+        </div>
+        <div class="field">
+          <label for="plano-excedente-peca">Preço da peça excedente (R$)</label>
+          <input type="number" id="plano-excedente-peca" step="0.01" min="0" placeholder="Ex: 15.00 (opcional)">
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="cadastrarPlano()">+ Cadastrar Plano</button>
+    </div>
+
+    <div class="card">
+      <h2>Planos Disponíveis</h2>
+      <div id="planos-list"></div>
+      <div class="empty-state" id="planos-empty" style="display:none;">
+        <div class="icon">💎</div>
+        <div>Nenhum plano cadastrado ainda.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Assinar Cliente a um Plano</h2>
+      <div class="grid3">
+        <div class="field">
+          <label for="assin-cliente">Nome do cliente *</label>
+          <input type="text" id="assin-cliente" placeholder="Ex: João Pereira">
+          <div class="error-msg" id="err-assin-cliente">Informe o nome do cliente.</div>
+        </div>
+        <div class="field">
+          <label for="assin-telefone">Telefone *</label>
+          <input type="text" id="assin-telefone" placeholder="Ex: (21) 98888-0000">
+          <div class="error-msg" id="err-assin-telefone">Informe o telefone.</div>
+        </div>
+        <div class="field">
+          <label for="assin-plano">Plano *</label>
+          <select id="assin-plano"></select>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="assinarCliente()">+ Ativar Assinatura</button>
+    </div>
+
+    <div class="card">
+      <h2>Assinantes Ativos — Uso do Ciclo Atual</h2>
+      <div class="search-bar">
+        <input type="text" id="busca-assinante" placeholder="Buscar assinante..." oninput="renderAssinantes()">
+      </div>
+      <div id="assinantes-list"></div>
+      <div class="empty-state" id="assinantes-empty" style="display:none;">
+        <div class="icon">👤</div>
+        <div>Nenhum assinante ativo ainda.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL REGISTRAR USO -->
+  <div class="modal-overlay" id="modal-uso-overlay">
+    <div class="modal" style="max-width:420px;">
+      <button class="modal-close" onclick="closeUsoModal()">✕</button>
+      <h3>Registrar Uso da Franquia</h3>
+      <div id="uso-content"></div>
+    </div>
+  </div>
+
+  <!-- MODAL PAGAMENTO PIX -->
+  <div class="modal-overlay" id="modal-pix-overlay">
+    <div class="modal" style="max-width:380px;text-align:center;">
+      <button class="modal-close" onclick="closePixModal()">✕</button>
+      <h3>💳 Cobrança na Entrega</h3>
+      <div id="pix-content"></div>
+    </div>
+  </div>
+
+  <!-- MODAL DETALHES -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3 id="modal-title">Detalhes da OS</h3>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+  </div>
+  </main>
+</div>
+
+<script>
+// ---------- ESTADO ----------
+const STATUS_FLOW = ["Recebido","Lavando","Secando","Passando","Pronto","Entregue"];
+let osList = [];
+let itemCounter = 0;
+let osCounter = 1;
+let insumosList = [];
+let movimentosInsumos = [];
+let deliveryList = [];
+let notifLog = [];
+const DEL_STATUS_FLOW = ["Agendado","A caminho","Entregue"];
+let planosList = [];
+let assinantesList = [];
+
+// ---------- PERSISTÊNCIA ----------
+function loadData(){
+  try{
+    const saved = localStorage.getItem('lavanderia_os_list');
+    const counter = localStorage.getItem('lavanderia_os_counter');
+    const savedInsumos = localStorage.getItem('lavanderia_insumos');
+    const savedMov = localStorage.getItem('lavanderia_movimentos');
+    const savedDelivery = localStorage.getItem('lavanderia_delivery');
+    const savedNotif = localStorage.getItem('lavanderia_notif');
+    const savedPlanos = localStorage.getItem('lavanderia_planos');
+    const savedAssinantes = localStorage.getItem('lavanderia_assinantes');
+    if(saved) osList = JSON.parse(saved);
+    if(counter) osCounter = parseInt(counter,10);
+    if(savedInsumos) insumosList = JSON.parse(savedInsumos);
+    if(savedMov) movimentosInsumos = JSON.parse(savedMov);
+    if(savedDelivery) deliveryList = JSON.parse(savedDelivery);
+    if(savedNotif) notifLog = JSON.parse(savedNotif);
+    if(savedPlanos) planosList = JSON.parse(savedPlanos);
+    if(savedAssinantes) assinantesList = JSON.parse(savedAssinantes);
+  }catch(e){
+    console.error('Erro ao carregar dados salvos:', e);
+    osList = [];
+    insumosList = [];
+    movimentosInsumos = [];
+    deliveryList = [];
+    notifLog = [];
+    planosList = [];
+    assinantesList = [];
+  }
+}
+function saveData(){
+  try{
+    localStorage.setItem('lavanderia_os_list', JSON.stringify(osList));
+    localStorage.setItem('lavanderia_os_counter', String(osCounter));
+    localStorage.setItem('lavanderia_insumos', JSON.stringify(insumosList));
+    localStorage.setItem('lavanderia_movimentos', JSON.stringify(movimentosInsumos));
+    localStorage.setItem('lavanderia_delivery', JSON.stringify(deliveryList));
+    localStorage.setItem('lavanderia_notif', JSON.stringify(notifLog));
+    localStorage.setItem('lavanderia_planos', JSON.stringify(planosList));
+    localStorage.setItem('lavanderia_assinantes', JSON.stringify(assinantesList));
+  }catch(e){
+    console.error('Erro ao salvar dados:', e);
+    alert('Não foi possível salvar os dados. Verifique o espaço de armazenamento do navegador.');
+  }
+}
+
+// ---------- NAVEGAÇÃO DE ABAS ----------
+document.querySelectorAll('.sidebar nav button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.sidebar nav button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('screen-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='rastreio') renderRastreio();
+    if(btn.dataset.tab==='historico') renderHistorico();
+    if(btn.dataset.tab==='insumos') renderInsumos();
+    if(btn.dataset.tab==='delivery') renderDelivery();
+    if(btn.dataset.tab==='assinaturas') renderAssinaturas();
+  });
+});
+
+// ---------- TELA 1: ITENS DO PEDIDO ----------
+function addItemRow(){
+  itemCounter++;
+  const id = 'item-'+itemCounter;
+  const container = document.getElementById('items-container');
+  const row = document.createElement('div');
+  row.className = 'item-row';
+  row.id = id;
+  row.innerHTML = `
+    <div class="field" style="margin-bottom:0;">
+      <label>Item</label>
+      <select class="item-tipo">
+        <option value="quilo">Roupa por quilo</option>
+        <option value="camisa">Camisa social</option>
+        <option value="calca">Calça</option>
+        <option value="terno">Terno</option>
+        <option value="vestido">Vestido</option>
+        <option value="edredom">Edredom</option>
+        <option value="cobertor">Cobertor</option>
+        <option value="outro">Outro (avulso)</option>
+      </select>
+    </div>
+    <div class="field" style="margin-bottom:0;">
+      <label class="qtd-peso-label">Peso (kg)</label>
+      <input type="number" class="item-qtd" step="0.1" min="0" placeholder="Ex: 3.5">
+    </div>
+    <div class="field" style="margin-bottom:0;">
+      <label>Preço unit. (R$)</label>
+      <input type="number" class="item-preco" step="0.01" min="0" placeholder="Ex: 12.00">
+    </div>
+    <div class="field" style="margin-bottom:0;">
+      <label>Subtotal</label>
+      <input type="text" class="item-subtotal" disabled value="R$ 0,00" style="background:#F9FAFB;">
+    </div>
+    <button class="remove-item" onclick="removeItemRow('${id}')" title="Remover item">🗑️</button>
+  `;
+  container.appendChild(row);
+
+  const tipoSelect = row.querySelector('.item-tipo');
+  const qtdLabel = row.querySelector('.qtd-peso-label');
+  tipoSelect.addEventListener('change', ()=>{
+    qtdLabel.textContent = tipoSelect.value === 'quilo' ? 'Peso (kg)' : 'Quantidade (un.)';
+    row.querySelector('.item-qtd').placeholder = tipoSelect.value === 'quilo' ? 'Ex: 3.5' : 'Ex: 2';
+    updateSubtotal(row);
+  });
+  row.querySelector('.item-qtd').addEventListener('input', ()=>updateSubtotal(row));
+  row.querySelector('.item-preco').addEventListener('input', ()=>updateSubtotal(row));
+}
+function removeItemRow(id){
+  document.getElementById(id).remove();
+  updateTotal();
+}
+function updateSubtotal(row){
+  const qtd = parseFloat(row.querySelector('.item-qtd').value) || 0;
+  const preco = parseFloat(row.querySelector('.item-preco').value) || 0;
+  const subtotal = qtd * preco;
+  row.querySelector('.item-subtotal').value = formatBRL(subtotal);
+  updateTotal();
+}
+function updateTotal(){
+  let total = 0;
+  document.querySelectorAll('#items-container .item-row').forEach(row=>{
+    const qtd = parseFloat(row.querySelector('.item-qtd').value) || 0;
+    const preco = parseFloat(row.querySelector('.item-preco').value) || 0;
+    total += qtd * preco;
+  });
+  document.getElementById('total-display').textContent = formatBRL(total);
+  return total;
+}
+function formatBRL(value){
+  return value.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+}
+
+// ---------- VALIDAÇÃO E FINALIZAÇÃO DA OS ----------
+function clearErrors(){
+  document.querySelectorAll('.error-msg').forEach(e=>e.classList.remove('show'));
+  document.querySelectorAll('input.error,select.error').forEach(e=>e.classList.remove('error'));
+}
+function finalizarOS(){
+  clearErrors();
+  let valid = true;
+
+  const nome = document.getElementById('cli-nome');
+  const tel = document.getElementById('cli-tel');
+
+  if(!nome.value.trim()){
+    nome.classList.add('error');
+    document.getElementById('err-cli-nome').classList.add('show');
+    valid = false;
+  }
+  if(!tel.value.trim()){
+    tel.classList.add('error');
+    document.getElementById('err-cli-tel').classList.add('show');
+    valid = false;
+  }
+
+  const itemRows = document.querySelectorAll('#items-container .item-row');
+  if(itemRows.length === 0){
+    document.getElementById('err-items').classList.add('show');
+    valid = false;
+  }
+
+  const items = [];
+  let hasIncompleteItem = false;
+  itemRows.forEach(row=>{
+    const tipo = row.querySelector('.item-tipo').value;
+    const tipoLabel = row.querySelector('.item-tipo').selectedOptions[0].textContent;
+    const qtd = parseFloat(row.querySelector('.item-qtd').value) || 0;
+    const preco = parseFloat(row.querySelector('.item-preco').value) || 0;
+    if(qtd <= 0 || preco <= 0){
+      row.querySelector('.item-qtd').classList.add('error');
+      row.querySelector('.item-preco').classList.add('error');
+      hasIncompleteItem = true;
+    }
+    items.push({tipo, tipoLabel, qtd, preco, subtotal: qtd*preco});
+  });
+  if(hasIncompleteItem){
+    document.getElementById('err-items').textContent = 'Preencha quantidade e preço de todos os itens.';
+    document.getElementById('err-items').classList.add('show');
+    valid = false;
+  }
+
+  if(!valid) return;
+
+  const total = updateTotal();
+  const codigo = '#' + String(osCounter).padStart(4,'0');
+  const now = new Date();
+
+  const novaOS = {
+    codigo,
+    cliente: nome.value.trim(),
+    telefone: tel.value.trim(),
+    itens: items,
+    observacoes: document.getElementById('os-obs').value.trim(),
+    total,
+    status: 'Recebido',
+    dataEntrada: now.toISOString(),
+    dataEntradaFormatada: now.toLocaleString('pt-BR'),
+    operador: 'Balcão'
+  };
+
+  osList.unshift(novaOS);
+  osCounter++;
+  saveData();
+
+  // feedback de sucesso
+  const successDiv = document.getElementById('os-success');
+  successDiv.style.display = 'block';
+  successDiv.innerHTML = `
+    <div class="success-card">
+      <h3>✅ OS ${codigo} criada com sucesso!</h3>
+      <p style="color:var(--text-light);margin-bottom:16px;">Cliente: ${novaOS.cliente} · Total: ${formatBRL(total)}</p>
+      <button class="btn btn-success" onclick="document.querySelector('[data-tab=rastreio]').click()">Ver no Acompanhamento</button>
+    </div>
+  `;
+  successDiv.scrollIntoView({behavior:'smooth'});
+
+  // reset do formulário
+  nome.value = '';
+  tel.value = '';
+  document.getElementById('os-obs').value = '';
+  document.getElementById('items-container').innerHTML = '';
+  document.getElementById('total-display').textContent = 'R$ 0,00';
+  addItemRow();
+}
+
+// ---------- TELA 2: RASTREIO ----------
+let statusFilterAtivo = 'todos';
+document.getElementById('status-filter').addEventListener('click', (e)=>{
+  if(e.target.tagName !== 'BUTTON') return;
+  document.querySelectorAll('#status-filter button').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  statusFilterAtivo = e.target.dataset.status;
+  renderRastreio();
+});
+
+function renderRastreio(){
+  const container = document.getElementById('rastreio-list');
+  const busca = document.getElementById('busca-rastreio').value.toLowerCase();
+
+  let lista = osList.filter(os => os.status !== 'Entregue');
+  if(statusFilterAtivo !== 'todos'){
+    lista = lista.filter(os => os.status === statusFilterAtivo);
+  }
+  if(busca){
+    lista = lista.filter(os =>
+      os.cliente.toLowerCase().includes(busca) ||
+      os.codigo.toLowerCase().includes(busca)
+    );
+  }
+
+  if(lista.length === 0){
+    container.innerHTML = `<div class="card"><div class="empty-state"><div class="icon">🧺</div><div>Nenhuma OS em andamento neste filtro.</div></div></div>`;
+    return;
+  }
+
+  container.innerHTML = lista.map(os=>{
+    const badgeClass = 'badge-' + os.status.toLowerCase();
+    const currentIdx = STATUS_FLOW.indexOf(os.status);
+    const nextStatus = STATUS_FLOW[currentIdx+1];
+    return `
+      <div class="os-card">
+        <div class="os-card-top">
+          <div>
+            <div class="os-code">${os.codigo} — ${os.cliente}</div>
+            <div class="os-client">📞 ${os.telefone}</div>
+          </div>
+          <span class="badge ${badgeClass}">${os.status}</span>
+        </div>
+        <div class="os-meta">
+          <span>📅 ${os.dataEntradaFormatada}</span>
+          <span>🧾 ${os.itens.length} item(ns)</span>
+          <span>💰 ${formatBRL(os.total)}</span>
+        </div>
+        <div class="os-actions">
+          ${nextStatus ? `<button class="btn btn-primary btn-sm" onclick="avancarStatus('${os.codigo}')">Avançar para "${nextStatus}" →</button>` : ''}
+          <button class="btn btn-secondary btn-sm" onclick="verDetalhes('${os.codigo}')">Ver detalhes</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function avancarStatus(codigo){
+  const os = osList.find(o => o.codigo === codigo);
+  if(!os) return;
+  const idx = STATUS_FLOW.indexOf(os.status);
+  if(idx < STATUS_FLOW.length - 1){
+    os.status = STATUS_FLOW[idx+1];
+    if(os.status === 'Entregue'){
+      os.dataEntrega = new Date().toLocaleString('pt-BR');
+    }
+    saveData();
+    renderRastreio();
+    renderHistorico();
+    calcularCustoTotalInsumos();
+  }
+}
+
+// ---------- TELA 3: HISTÓRICO ----------
+function renderHistorico(){
+  const tbody = document.getElementById('historico-tbody');
+  const empty = document.getElementById('historico-empty');
+  const busca = document.getElementById('busca-historico').value.toLowerCase();
+  const filtroStatus = document.getElementById('filtro-status-hist').value;
+
+  let lista = [...osList];
+  if(filtroStatus !== 'todos'){
+    lista = lista.filter(os => os.status === filtroStatus);
+  }
+  if(busca){
+    lista = lista.filter(os =>
+      os.cliente.toLowerCase().includes(busca) ||
+      os.codigo.toLowerCase().includes(busca) ||
+      os.dataEntradaFormatada.toLowerCase().includes(busca)
+    );
+  }
+
+  if(lista.length === 0){
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = lista.map(os=>{
+    const badgeClass = 'badge-' + os.status.toLowerCase();
+    return `
+      <tr>
+        <td><strong>${os.codigo}</strong></td>
+        <td>${os.cliente}</td>
+        <td>${os.dataEntradaFormatada}</td>
+        <td>${os.itens.length}</td>
+        <td>${formatBRL(os.total)}</td>
+        <td><span class="badge ${badgeClass}">${os.status}</span></td>
+        <td><button class="btn btn-secondary btn-sm" onclick="verDetalhes('${os.codigo}')">Detalhes</button></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ---------- MODAL DE DETALHES ----------
+function verDetalhes(codigo){
+  const os = osList.find(o => o.codigo === codigo);
+  if(!os) return;
+
+  document.getElementById('modal-title').textContent = `Detalhes da OS ${os.codigo}`;
+  const itensHtml = os.itens.map(it=>`
+    <div class="detail-row">
+      <span>${it.tipoLabel} (${it.tipo==='quilo' ? it.qtd+' kg' : it.qtd+' un.'})</span>
+      <span>${formatBRL(it.subtotal)}</span>
+    </div>
+  `).join('');
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="detail-row"><span>Cliente</span><span>${os.cliente}</span></div>
+    <div class="detail-row"><span>Telefone</span><span>${os.telefone}</span></div>
+    <div class="detail-row"><span>Data de entrada</span><span>${os.dataEntradaFormatada}</span></div>
+    <div class="detail-row"><span>Status atual</span><span>${os.status}</span></div>
+    ${os.dataEntrega ? `<div class="detail-row"><span>Data de entrega</span><span>${os.dataEntrega}</span></div>` : ''}
+    <div style="margin:16px 0 8px;font-weight:600;font-size:14px;color:var(--text-light);">ITENS</div>
+    ${itensHtml}
+    <div class="total-box" style="margin-top:16px;">
+      <span class="label">Total</span>
+      <span class="value">${formatBRL(os.total)}</span>
+    </div>
+    ${os.observacoes ? `<div style="margin-top:16px;"><div style="font-weight:600;font-size:14px;color:var(--text-light);margin-bottom:6px;">OBSERVAÇÕES / DANOS PRÉVIOS</div><div style="font-size:14px;background:var(--warn-bg);color:var(--warn);padding:12px 16px;border-radius:8px;">${os.observacoes}</div></div>` : ''}
+  `;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function closeModal(){
+  document.getElementById('modal-overlay').classList.remove('show');
+}
+document.getElementById('modal-overlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'modal-overlay') closeModal();
+});
+
+// ---------- MÓDULO 2: INSUMOS ----------
+function cadastrarInsumo(){
+  clearErrors();
+  let valid = true;
+
+  const nome = document.getElementById('ins-nome');
+  const custo = document.getElementById('ins-custo');
+  const estoque = document.getElementById('ins-estoque');
+  const minimo = document.getElementById('ins-minimo');
+  const consumoCiclo = document.getElementById('ins-consumo-ciclo');
+
+  if(!nome.value.trim()){
+    nome.classList.add('error');
+    document.getElementById('err-ins-nome').classList.add('show');
+    valid = false;
+  }
+  if(!custo.value || parseFloat(custo.value) <= 0){
+    custo.classList.add('error');
+    document.getElementById('err-ins-custo').classList.add('show');
+    valid = false;
+  }
+  if(!estoque.value || parseFloat(estoque.value) < 0){
+    estoque.classList.add('error');
+    document.getElementById('err-ins-estoque').classList.add('show');
+    valid = false;
+  }
+  if(!minimo.value || parseFloat(minimo.value) < 0){
+    minimo.classList.add('error');
+    document.getElementById('err-ins-minimo').classList.add('show');
+    valid = false;
+  }
+  if(!consumoCiclo.value || parseFloat(consumoCiclo.value) <= 0){
+    consumoCiclo.classList.add('error');
+    document.getElementById('err-ins-consumo-ciclo').classList.add('show');
+    valid = false;
+  }
+
+  if(!valid) return;
+
+  insumosList.push({
+    id: 'ins-' + Date.now(),
+    nome: nome.value.trim(),
+    unidade: document.getElementById('ins-unidade').value,
+    custo: parseFloat(custo.value),
+    estoque: parseFloat(estoque.value),
+    minimo: parseFloat(minimo.value),
+    consumoPorCiclo: parseFloat(consumoCiclo.value)
+  });
+  saveData();
+
+  nome.value = '';
+  custo.value = '';
+  estoque.value = '';
+  minimo.value = '';
+  consumoCiclo.value = '';
+
+  renderInsumos();
+}
+
+function renderInsumos(){
+  const container = document.getElementById('insumos-list');
+  const empty = document.getElementById('insumos-empty');
+  const busca = (document.getElementById('busca-insumo')?.value || '').toLowerCase();
+
+  let lista = insumosList.filter(i => i.nome.toLowerCase().includes(busca));
+
+  if(insumosList.length === 0){
+    container.innerHTML = '';
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    container.innerHTML = lista.map(ins=>{
+      const baixo = ins.estoque <= ins.minimo;
+      const pctEstoque = ins.minimo > 0 ? Math.min(100, (ins.estoque / (ins.minimo*3)) * 100) : 100;
+      return `
+        <div class="os-card">
+          <div class="os-card-top">
+            <div>
+              <div class="os-code">${ins.nome}</div>
+              <div class="os-client">Custo unit.: ${formatBRL(ins.custo)} / ${ins.unidade} · Consumo por ciclo: ${ins.consumoPorCiclo} ${ins.unidade}</div>
+            </div>
+            ${baixo ? '<span class="badge badge-secando">⚠️ Estoque baixo</span>' : '<span class="badge badge-pronto">OK</span>'}
+          </div>
+          <div class="os-meta">
+            <span>📦 Estoque atual: <strong>${ins.estoque} ${ins.unidade}</strong></span>
+            <span>🎯 Mínimo: ${ins.minimo} ${ins.unidade}</span>
+          </div>
+          <div class="os-actions">
+            <button class="btn btn-danger btn-sm" onclick="removerInsumo('${ins.id}')">🗑️ Remover</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  atualizarSelectInsumos();
+  renderAlertasEstoque();
+  calcularCustoTotalInsumos();
+}
+
+function removerInsumo(id){
+  insumosList = insumosList.filter(i => i.id !== id);
+  saveData();
+  renderInsumos();
+}
+
+function atualizarSelectInsumos(){
+  const select = document.getElementById('mov-insumo');
+  if(!select) return;
+  const atual = select.value;
+  select.innerHTML = insumosList.map(ins =>
+    `<option value="${ins.id}">${ins.nome} (${ins.estoque} ${ins.unidade} em estoque)</option>`
+  ).join('') || '<option value="">Nenhum insumo cadastrado</option>';
+  if(atual) select.value = atual;
+}
+
+function renderAlertasEstoque(){
+  const card = document.getElementById('alertas-estoque-card');
+  const list = document.getElementById('alertas-estoque-list');
+  const baixos = insumosList.filter(i => i.estoque <= i.minimo);
+
+  if(baixos.length === 0){
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = 'block';
+  list.innerHTML = baixos.map(ins => `
+    <div class="detail-row">
+      <span>🧴 ${ins.nome} — estoque atual: ${ins.estoque} ${ins.unidade}</span>
+      <span style="color:var(--error);">Repor (mín: ${ins.minimo} ${ins.unidade})</span>
+    </div>
+  `).join('');
+}
+
+function registrarMovimento(){
+  clearErrors();
+  const select = document.getElementById('mov-insumo');
+  const tipo = document.getElementById('mov-tipo').value;
+  const qtdInput = document.getElementById('mov-qtd');
+  const qtd = parseFloat(qtdInput.value);
+
+  if(!select.value){
+    alert('Cadastre ao menos um insumo antes de registrar movimentos.');
+    return;
+  }
+  if(!qtd || qtd <= 0){
+    qtdInput.classList.add('error');
+    document.getElementById('err-mov-qtd').classList.add('show');
+    return;
+  }
+
+  const insumo = insumosList.find(i => i.id === select.value);
+  if(!insumo) return;
+
+  if(tipo === 'entrada'){
+    insumo.estoque += qtd;
+  } else {
+    if(qtd > insumo.estoque){
+      alert(`Estoque insuficiente. Disponível: ${insumo.estoque} ${insumo.unidade}.`);
+      return;
+    }
+    insumo.estoque -= qtd;
+  }
+
+  movimentosInsumos.unshift({
+    id: 'mov-' + Date.now(),
+    insumoId: insumo.id,
+    insumoNome: insumo.nome,
+    tipo,
+    qtd,
+    data: new Date().toLocaleString('pt-BR')
+  });
+
+  saveData();
+  qtdInput.value = '';
+  renderInsumos();
+}
+
+function calcularCustoTotalInsumos(){
+  // Estima custo de insumos com base em quantas OS já passaram por "Lavando" ou status posterior
+  const ciclosProcessados = osList.filter(os =>
+    STATUS_FLOW.indexOf(os.status) >= STATUS_FLOW.indexOf('Lavando')
+  ).length;
+
+  let custoTotal = 0;
+  insumosList.forEach(ins => {
+    custoTotal += ins.consumoPorCiclo * ins.custo * ciclosProcessados;
+  });
+
+  document.getElementById('custo-total-insumos').textContent = formatBRL(custoTotal);
+}
+
+// ---------- MÓDULO 3: DELIVERY ----------
+function popularSelectOS(){
+  const select = document.getElementById('del-os');
+  if(!select) return;
+  const atual = select.value;
+  const disponiveis = osList.filter(os => os.status !== 'Entregue');
+  select.innerHTML = disponiveis.map(os =>
+    `<option value="${os.codigo}">${os.codigo} — ${os.cliente} (${os.status})</option>`
+  ).join('') || '<option value="">Nenhuma OS disponível</option>';
+  if(atual) select.value = atual;
+}
+
+function enviarNotificacao(cliente, mensagem){
+  notifLog.unshift({
+    id: 'notif-' + Date.now() + Math.random().toString(16).slice(2),
+    cliente,
+    mensagem,
+    data: new Date().toLocaleString('pt-BR')
+  });
+}
+
+function agendarDelivery(){
+  clearErrors();
+  let valid = true;
+
+  const osSelect = document.getElementById('del-os');
+  const endereco = document.getElementById('del-endereco');
+  const janela = document.getElementById('del-janela');
+
+  if(!osSelect.value){
+    document.getElementById('err-del-os').classList.add('show');
+    valid = false;
+  }
+  if(!endereco.value.trim()){
+    endereco.classList.add('error');
+    document.getElementById('err-del-endereco').classList.add('show');
+    valid = false;
+  }
+  if(!janela.value.trim()){
+    janela.classList.add('error');
+    document.getElementById('err-del-janela').classList.add('show');
+    valid = false;
+  }
+  if(!valid) return;
+
+  const os = osList.find(o => o.codigo === osSelect.value);
+  const tipo = document.getElementById('del-tipo').value;
+
+  const novaRota = {
+    id: 'del-' + Date.now(),
+    osCodigo: os.codigo,
+    cliente: os.cliente,
+    telefone: os.telefone,
+    tipo,
+    endereco: endereco.value.trim(),
+    janela: janela.value.trim(),
+    status: 'Agendado',
+    valorOS: os.total,
+    pago: false
+  };
+  deliveryList.unshift(novaRota);
+
+  const tipoLabel = tipo === 'coleta' ? 'coleta das suas roupas' : 'entrega das suas roupas prontas';
+  enviarNotificacao(os.cliente, `Olá ${os.cliente}! Agendamos a ${tipoLabel} (OS ${os.codigo}) para ${janela.value.trim()}. Endereço: ${endereco.value.trim()}.`);
+
+  saveData();
+  endereco.value = '';
+  janela.value = '';
+  renderDelivery();
+}
+
+let delStatusFiltroAtivo = 'todos';
+document.addEventListener('click', (e)=>{
+  if(e.target.closest('#del-status-filter') && e.target.tagName === 'BUTTON'){
+    document.querySelectorAll('#del-status-filter button').forEach(b=>b.classList.remove('active'));
+    e.target.classList.add('active');
+    delStatusFiltroAtivo = e.target.dataset.status;
+    renderDelivery();
+  }
+});
+
+function renderDelivery(){
+  popularSelectOS();
+  const container = document.getElementById('delivery-list');
+  const empty = document.getElementById('delivery-empty');
+
+  let lista = [...deliveryList];
+  if(delStatusFiltroAtivo !== 'todos'){
+    lista = lista.filter(d => d.status === delStatusFiltroAtivo);
+  }
+
+  if(lista.length === 0){
+    container.innerHTML = '';
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    const badgeMap = {'Agendado':'badge-recebido','A caminho':'badge-secando','Entregue':'badge-pronto'};
+    container.innerHTML = lista.map(d=>{
+      const idx = DEL_STATUS_FLOW.indexOf(d.status);
+      const next = DEL_STATUS_FLOW[idx+1];
+      return `
+        <div class="os-card">
+          <div class="os-card-top">
+            <div>
+              <div class="os-code">${d.osCodigo} — ${d.cliente}</div>
+              <div class="os-client">${d.tipo === 'coleta' ? '📥 Coleta' : '📤 Entrega'} · 📍 ${d.endereco}</div>
+            </div>
+            <span class="badge ${badgeMap[d.status]}">${d.status}</span>
+          </div>
+          <div class="os-meta">
+            <span>🕐 Janela: ${d.janela}</span>
+            <span>💰 ${formatBRL(d.valorOS)}</span>
+            <span>${d.pago ? '✅ Pago' : '⏳ Pagamento pendente'}</span>
+          </div>
+          <div class="os-actions">
+            ${next ? `<button class="btn btn-primary btn-sm" onclick="avancarDelivery('${d.id}')">Avançar para "${next}" →</button>` : ''}
+            ${(d.tipo==='entrega' && !d.pago) ? `<button class="btn btn-success btn-sm" onclick="abrirPix('${d.id}')">💳 Gerar Cobrança Pix</button>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  renderNotifLog();
+}
+
+function avancarDelivery(id){
+  const d = deliveryList.find(x => x.id === id);
+  if(!d) return;
+  const idx = DEL_STATUS_FLOW.indexOf(d.status);
+  if(idx < DEL_STATUS_FLOW.length - 1){
+    d.status = DEL_STATUS_FLOW[idx+1];
+
+    if(d.status === 'A caminho'){
+      enviarNotificacao(d.cliente, `${d.cliente}, seu pedido ${d.osCodigo} está a caminho! Chegada estimada dentro da janela combinada: ${d.janela}.`);
+    }
+    if(d.status === 'Entregue'){
+      enviarNotificacao(d.cliente, `${d.cliente}, seu pedido ${d.osCodigo} foi entregue com sucesso. Obrigado pela preferência! 🧺`);
+      const os = osList.find(o => o.codigo === d.osCodigo);
+      if(os && d.tipo === 'entrega'){
+        os.status = 'Entregue';
+        os.dataEntrega = new Date().toLocaleString('pt-BR');
+      }
+    }
+    saveData();
+    renderDelivery();
+    renderRastreio();
+    renderHistorico();
+  }
+}
+
+function abrirPix(id){
+  const d = deliveryList.find(x => x.id === id);
+  if(!d) return;
+  document.getElementById('pix-content').innerHTML = `
+    <p style="color:var(--text-light);margin-bottom:16px;">Pedido ${d.osCodigo} — ${d.cliente}</p>
+    <div class="total-box" style="margin-bottom:20px;">
+      <span class="label">Valor a cobrar</span>
+      <span class="value">${formatBRL(d.valorOS)}</span>
+    </div>
+    <div style="background:#F3F4F6;border-radius:12px;padding:20px;margin-bottom:20px;font-family:monospace;font-size:13px;color:var(--text-light);word-break:break-all;">
+      00020126580014BR.GOV.BCB.PIX-SIMULADO-${d.osCodigo}-${Math.round(d.valorOS*100)}5204000053039865802BR
+    </div>
+    <p style="font-size:13px;color:var(--text-light);margin-bottom:16px;">QR Code Pix simulado — em produção, seria gerado via API do seu banco/adquirente, com baixa automática do pagamento.</p>
+    <button class="btn btn-success btn-block" onclick="confirmarPagamentoPix('${d.id}')">✅ Confirmar Pagamento Recebido</button>
+  `;
+  document.getElementById('modal-pix-overlay').classList.add('show');
+}
+function closePixModal(){
+  document.getElementById('modal-pix-overlay').classList.remove('show');
+}
+document.getElementById('modal-pix-overlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'modal-pix-overlay') closePixModal();
+});
+
+function confirmarPagamentoPix(id){
+  const d = deliveryList.find(x => x.id === id);
+  if(!d) return;
+  d.pago = true;
+  enviarNotificacao(d.cliente, `Pagamento de ${formatBRL(d.valorOS)} confirmado para o pedido ${d.osCodigo}. Obrigado!`);
+  saveData();
+  closePixModal();
+  renderDelivery();
+}
+
+function renderNotifLog(){
+  const container = document.getElementById('notif-log');
+  const empty = document.getElementById('notif-empty');
+  if(notifLog.length === 0){
+    container.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  container.innerHTML = notifLog.slice(0,20).map(n => `
+    <div class="detail-row">
+      <span>💬 <strong>${n.cliente}:</strong> ${n.mensagem}</span>
+      <span style="white-space:nowrap;color:var(--text-light);font-size:12px;">${n.data}</span>
+    </div>
+  `).join('');
+}
+
+// ---------- MÓDULO 4: ASSINATURAS ----------
+function cadastrarPlano(){
+  clearErrors();
+  let valid = true;
+
+  const nome = document.getElementById('plano-nome');
+  const preco = document.getElementById('plano-preco');
+  const franquiaKg = document.getElementById('plano-franquia-kg');
+  const excedenteKg = document.getElementById('plano-excedente-kg');
+
+  if(!nome.value.trim()){
+    nome.classList.add('error');
+    document.getElementById('err-plano-nome').classList.add('show');
+    valid = false;
+  }
+  if(!preco.value || parseFloat(preco.value) <= 0){
+    preco.classList.add('error');
+    document.getElementById('err-plano-preco').classList.add('show');
+    valid = false;
+  }
+  if(!franquiaKg.value || parseFloat(franquiaKg.value) <= 0){
+    franquiaKg.classList.add('error');
+    document.getElementById('err-plano-franquia-kg').classList.add('show');
+    valid = false;
+  }
+  if(!excedenteKg.value || parseFloat(excedenteKg.value) <= 0){
+    excedenteKg.classList.add('error');
+    document.getElementById('err-plano-excedente-kg').classList.add('show');
+    valid = false;
+  }
+  if(!valid) return;
+
+  planosList.push({
+    id: 'plano-' + Date.now(),
+    nome: nome.value.trim(),
+    preco: parseFloat(preco.value),
+    franquiaKg: parseFloat(franquiaKg.value),
+    franquiaPecas: parseFloat(document.getElementById('plano-franquia-pecas').value) || 0,
+    excedenteKg: parseFloat(excedenteKg.value),
+    excedentePeca: parseFloat(document.getElementById('plano-excedente-peca').value) || 0
+  });
+  saveData();
+
+  nome.value=''; preco.value=''; franquiaKg.value='';
+  document.getElementById('plano-franquia-pecas').value='';
+  excedenteKg.value='';
+  document.getElementById('plano-excedente-peca').value='';
+
+  renderAssinaturas();
+}
+
+function renderPlanos(){
+  const container = document.getElementById('planos-list');
+  const empty = document.getElementById('planos-empty');
+  if(planosList.length === 0){
+    container.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  container.innerHTML = planosList.map(p => `
+    <div class="os-card">
+      <div class="os-card-top">
+        <div>
+          <div class="os-code">${p.nome}</div>
+          <div class="os-client">${formatBRL(p.preco)}/mês · Franquia: ${p.franquiaKg}kg${p.franquiaPecas ? ' + ' + p.franquiaPecas + ' peças' : ''}</div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="removerPlano('${p.id}')">🗑️</button>
+      </div>
+      <div class="os-meta">
+        <span>Excedente kg: ${formatBRL(p.excedenteKg)}</span>
+        ${p.excedentePeca ? `<span>Excedente peça: ${formatBRL(p.excedentePeca)}</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+function removerPlano(id){
+  planosList = planosList.filter(p => p.id !== id);
+  saveData();
+  renderAssinaturas();
+}
+
+function atualizarSelectPlanos(){
+  const select = document.getElementById('assin-plano');
+  if(!select) return;
+  const atual = select.value;
+  select.innerHTML = planosList.map(p =>
+    `<option value="${p.id}">${p.nome} — ${formatBRL(p.preco)}/mês</option>`
+  ).join('') || '<option value="">Cadastre um plano primeiro</option>';
+  if(atual) select.value = atual;
+}
+
+function assinarCliente(){
+  clearErrors();
+  let valid = true;
+
+  const cliente = document.getElementById('assin-cliente');
+  const telefone = document.getElementById('assin-telefone');
+  const planoSelect = document.getElementById('assin-plano');
+
+  if(!cliente.value.trim()){
+    cliente.classList.add('error');
+    document.getElementById('err-assin-cliente').classList.add('show');
+    valid = false;
+  }
+  if(!telefone.value.trim()){
+    telefone.classList.add('error');
+    document.getElementById('err-assin-telefone').classList.add('show');
+    valid = false;
+  }
+  if(!planoSelect.value){
+    alert('Cadastre ao menos um plano antes de assinar um cliente.');
+    return;
+  }
+  if(!valid) return;
+
+  const plano = planosList.find(p => p.id === planoSelect.value);
+
+  assinantesList.push({
+    id: 'assin-' + Date.now(),
+    cliente: cliente.value.trim(),
+    telefone: telefone.value.trim(),
+    planoId: plano.id,
+    dataInicio: new Date().toLocaleDateString('pt-BR'),
+    kgUsados: 0,
+    pecasUsadas: 0
+  });
+
+  enviarNotificacao(cliente.value.trim(), `Bem-vindo(a) ao ${plano.nome}! Sua franquia mensal é de ${plano.franquiaKg}kg${plano.franquiaPecas ? ' + ' + plano.franquiaPecas + ' peças' : ''}. Cobrança de ${formatBRL(plano.preco)} confirmada.`);
+
+  saveData();
+  cliente.value=''; telefone.value='';
+  renderAssinaturas();
+}
+
+function renderAssinantes(){
+  const container = document.getElementById('assinantes-list');
+  const empty = document.getElementById('assinantes-empty');
+  const busca = (document.getElementById('busca-assinante')?.value || '').toLowerCase();
+
+  const lista = assinantesList.filter(a => a.cliente.toLowerCase().includes(busca));
+
+  if(assinantesList.length === 0){
+    container.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  container.innerHTML = lista.map(a => {
+    const plano = planosList.find(p => p.id === a.planoId);
+    if(!plano) return '';
+    const kgRestante = Math.max(0, plano.franquiaKg - a.kgUsados);
+    const pecasRestante = Math.max(0, plano.franquiaPecas - a.pecasUsadas);
+    const excedeuKg = a.kgUsados > plano.franquiaKg;
+    const excedeuPecas = plano.franquiaPecas > 0 && a.pecasUsadas > plano.franquiaPecas;
+    const valorExcedente = (excedeuKg ? (a.kgUsados - plano.franquiaKg) * plano.excedenteKg : 0) +
+                            (excedeuPecas ? (a.pecasUsadas - plano.franquiaPecas) * plano.excedentePeca : 0);
+    return `
+      <div class="os-card">
+        <div class="os-card-top">
+          <div>
+            <div class="os-code">${a.cliente} — ${plano.nome}</div>
+            <div class="os-client">📞 ${a.telefone} · Assinante desde ${a.dataInicio}</div>
+          </div>
+          ${(excedeuKg || excedeuPecas) ? '<span class="badge badge-secando">⚠️ Excedente</span>' : '<span class="badge badge-pronto">Dentro da franquia</span>'}
+        </div>
+        <div class="os-meta">
+          <span>🧺 Kg usados: <strong>${a.kgUsados}</strong> / ${plano.franquiaKg} (restam ${kgRestante.toFixed(1)}kg)</span>
+          ${plano.franquiaPecas ? `<span>👕 Peças: <strong>${a.pecasUsadas}</strong> / ${plano.franquiaPecas} (restam ${pecasRestante})</span>` : ''}
+        </div>
+        ${valorExcedente > 0 ? `<div class="os-meta"><span style="color:var(--error);">💰 Excedente a cobrar: ${formatBRL(valorExcedente)}</span></div>` : ''}
+        <div class="os-actions">
+          <button class="btn btn-secondary btn-sm" onclick="abrirRegistroUso('${a.id}')">+ Registrar Uso</button>
+          <button class="btn btn-primary btn-sm" onclick="renovarCiclo('${a.id}')">🔄 Renovar Ciclo Mensal</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function abrirRegistroUso(id){
+  const a = assinantesList.find(x => x.id === id);
+  if(!a) return;
+  const plano = planosList.find(p => p.id === a.planoId);
+  document.getElementById('uso-content').innerHTML = `
+    <p style="color:var(--text-light);margin-bottom:16px;">${a.cliente} — ${plano.nome}</p>
+    <div class="field">
+      <label>Quilos usados nesta lavagem</label>
+      <input type="number" id="uso-kg" step="0.1" min="0" placeholder="Ex: 4.5">
+    </div>
+    <div class="field">
+      <label>Peças usadas nesta lavagem</label>
+      <input type="number" id="uso-pecas" step="1" min="0" placeholder="Ex: 1">
+    </div>
+    <button class="btn btn-primary btn-block" onclick="confirmarUso('${a.id}')">Confirmar Uso</button>
+  `;
+  document.getElementById('modal-uso-overlay').classList.add('show');
+}
+function closeUsoModal(){
+  document.getElementById('modal-uso-overlay').classList.remove('show');
+}
+document.getElementById('modal-uso-overlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'modal-uso-overlay') closeUsoModal();
+});
+
+function confirmarUso(id){
+  const a = assinantesList.find(x => x.id === id);
+  if(!a) return;
+  const kg = parseFloat(document.getElementById('uso-kg').value) || 0;
+  const pecas = parseFloat(document.getElementById('uso-pecas').value) || 0;
+  if(kg <= 0 && pecas <= 0){
+    alert('Informe ao menos quilos ou peças usados.');
+    return;
+  }
+  a.kgUsados += kg;
+  a.pecasUsadas += pecas;
+  saveData();
+  closeUsoModal();
+  renderAssinantes();
+}
+
+function renovarCiclo(id){
+  const a = assinantesList.find(x => x.id === id);
+  if(!a) return;
+  const plano = planosList.find(p => p.id === a.planoId);
+  if(!confirm(`Renovar o ciclo de ${a.cliente}? Isso zera o uso do mês e gera nova cobrança de ${formatBRL(plano.preco)}.`)) return;
+
+  a.kgUsados = 0;
+  a.pecasUsadas = 0;
+  enviarNotificacao(a.cliente, `Seu plano ${plano.nome} foi renovado! Nova cobrança de ${formatBRL(plano.preco)} via Pix. Franquia do mês resetada.`);
+  saveData();
+  renderAssinantes();
+  renderDelivery();
+}
+
+function renderAssinaturas(){
+  renderPlanos();
+  atualizarSelectPlanos();
+  renderAssinantes();
+}
+
+// ---------- INICIALIZAÇÃO ----------
+loadData();
+addItemRow();
+renderRastreio();
+renderHistorico();
+renderInsumos();
+renderDelivery();
+renderAssinaturas();
+</script>
+</body>
+</html>
