@@ -406,12 +406,13 @@
           </article>
 
           <article class="project-card project-card--featured project-card--wide scroll-reveal">
-            <div class="project-card__preview">
+            <div class="project-card__preview project-card__preview--clickable" onclick="openLightbox('automacao-relatorio-matinal/captura_20260629_225226.png', 'Workflow de Relatório Automático Matinal de Vendas no n8n')">
               <img
                 src="automacao-relatorio-matinal/captura_20260629_225226.png"
                 alt="Workflow de Relatório Automático Matinal de Vendas no n8n"
                 loading="lazy"
               />
+              <span class="preview-demo-btn">Demo</span>
             </div>
             <div class="project-card__top">
               <span class="project-card__icon">📋</span>
@@ -509,6 +510,12 @@
   </footer>
 
 
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <button class="lightbox__close" onclick="closeLightbox()" aria-label="Fechar">&times;</button>
+    <img class="lightbox__img" id="lightboxImg" src="" alt="" onclick="event.stopPropagation()" />
+  </div>
+
   <script>
     /* ── Ano dinâmico ── */
     document.getElementById('year').textContent = new Date().getFullYear();
@@ -548,6 +555,25 @@
     }, { threshold: 0.12 });
 
     document.querySelectorAll('.scroll-reveal').forEach(el => revealObserver.observe(el));
+
+    /* ── Lightbox ── */
+    function openLightbox(src, alt) {
+      const lb = document.getElementById('lightbox');
+      const img = document.getElementById('lightboxImg');
+      img.src = src;
+      img.alt = alt;
+      lb.classList.add('lightbox--open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('lightbox--open');
+      document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeLightbox();
+    });
   </script>
 
 </body>
