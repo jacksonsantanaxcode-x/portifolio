@@ -1,0 +1,446 @@
+{
+  "name": "Relatorio Automatico Matinal",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "1a2b3c4d-0001-0001-0001-000000000001",
+      "name": "Gatilho Di�rio 07h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "list",
+        "options": {}
+      },
+      "id": "1a2b3c4d-0002-0002-0002-000000000002",
+      "name": "Listar CSVs no Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 2,
+      "position": [
+        432,
+        400
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "vFWcQs4tUUcppH4J",
+          "name": "Google Drive account 3"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "1a2b3c4d-0014-0014-0014-000000000014",
+      "name": "Pegar S� o Mais Recente",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        560,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": "={{ $json.id }}",
+        "options": {}
+      },
+      "id": "1a2b3c4d-0003-0003-0003-000000000003",
+      "name": "Baixar CSV do Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 2,
+      "position": [
+        688,
+        400
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "vFWcQs4tUUcppH4J",
+          "name": "Google Drive account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "headerRow": true
+        }
+      },
+      "id": "1a2b3c4d-0004-0004-0004-000000000004",
+      "name": "Converter CSV em JSON",
+      "type": "n8n-nodes-base.spreadsheetFile",
+      "typeVersion": 2,
+      "position": [
+        912,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Agrupa todos os itens recebidos e calcula m�tricas de vendas\nconst items = $input.all();\n\nlet totalVendas = 0;\nlet totalPedidos = 0;\nlet melhorVendedor = { nome: '', valor: 0 };\nlet produtosMaisVendidos = {};\nlet vendasPorRegiao = {};\nconst hoje = new Date().toLocaleDateString('pt-BR');\n\nfor (const item of items) {\n  const dados = item.json;\n\n  // Adapte os nomes das colunas conforme seu CSV real\n  const valor = parseFloat((dados['valor_venda'] || dados['Valor'] || 0).toString().replace(',', '.'));\n  const vendedor = dados['vendedor'] || dados['Vendedor'] || 'N/A';\n  const produto = dados['produto'] || dados['Produto'] || 'N/A';\n  const regiao = dados['regiao'] || dados['Regi�o'] || dados['Regiao'] || 'N/A';\n\n  totalVendas += valor;\n  totalPedidos += 1;\n\n  if (valor > melhorVendedor.valor) {\n    melhorVendedor = { nome: vendedor, valor };\n  }\n\n  produtosMaisVendidos[produto] = (produtosMaisVendidos[produto] || 0) + valor;\n  vendasPorRegiao[regiao] = (vendasPorRegiao[regiao] || 0) + valor;\n}\n\n// Top 3 produtos\nconst topProdutos = Object.entries(produtosMaisVendidos)\n  .sort((a, b) => b[1] - a[1])\n  .slice(0, 3)\n  .map(([nome, valor]) => ({ nome, valor: valor.toFixed(2) }));\n\n// Top regi�es\nconst topRegioes = Object.entries(vendasPorRegiao)\n  .sort((a, b) => b[1] - a[1])\n  .map(([regiao, valor]) => ({ regiao, valor: valor.toFixed(2) }));\n\nconst metaDiaria = 50000; // Ajuste conforme a meta real\nconst percentualMeta = ((totalVendas / metaDiaria) * 100).toFixed(1);\nconst ticketMedio = totalPedidos > 0 ? (totalVendas / totalPedidos).toFixed(2) : 0;\n\nreturn [{\n  json: {\n    data: hoje,\n    totalVendas: totalVendas.toFixed(2),\n    totalPedidos,\n    ticketMedio,\n    percentualMeta,\n    melhorVendedor,\n    topProdutos,\n    topRegioes,\n    metaDiaria,\n    atingiuMeta: totalVendas >= metaDiaria\n  }\n}];\n"
+      },
+      "id": "1a2b3c4d-0005-0005-0005-000000000005",
+      "name": "Calcular M�tricas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Monta o HTML do relat�rio executivo para convers�o em PDF\nconst d = $input.first().json;\n\nconst topProdutosHTML = d.topProdutos.map((p, i) => `\n  <tr>\n    <td style=\"padding:8px 12px;border-bottom:1px solid #eee;\">${i + 1}�</td>\n    <td style=\"padding:8px 12px;border-bottom:1px solid #eee;\">${p.nome}</td>\n    <td style=\"padding:8px 12px;border-bottom:1px solid #eee;text-align:right;\">R$ ${parseFloat(p.valor).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>\n  </tr>`).join('');\n\nconst topRegioesHTML = d.topRegioes.map(r => `\n  <tr>\n    <td style=\"padding:8px 12px;border-bottom:1px solid #eee;\">${r.regiao}</td>\n    <td style=\"padding:8px 12px;border-bottom:1px solid #eee;text-align:right;\">R$ ${parseFloat(r.valor).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>\n  </tr>`).join('');\n\nconst corMeta = d.atingiuMeta ? '#27ae60' : '#e74c3c';\nconst statusMeta = d.atingiuMeta ? '? META ATINGIDA' : '?? ABAIXO DA META';\n\nconst html = `\n<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n  <meta charset=\"UTF-8\">\n  <style>\n    * { box-sizing: border-box; margin: 0; padding: 0; }\n    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; color: #333; }\n    .container { max-width: 780px; margin: 40px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }\n    .header { background: linear-gradient(135deg, #1a5276, #2980b9); padding: 36px 40px; color: #fff; }\n    .header h1 { font-size: 26px; font-weight: 700; letter-spacing: 0.5px; }\n    .header p { font-size: 14px; opacity: 0.85; margin-top: 6px; }\n    .badge { display: inline-block; margin-top: 14px; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; background: ${corMeta}; color: #fff; }\n    .body { padding: 36px 40px; }\n    .kpis { display: flex; gap: 16px; margin-bottom: 32px; }\n    .kpi { flex: 1; background: #f8f9fb; border-radius: 10px; padding: 20px; text-align: center; border-top: 4px solid #2980b9; }\n    .kpi .valor { font-size: 26px; font-weight: 800; color: #1a5276; }\n    .kpi .label { font-size: 12px; color: #888; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }\n    .meta-bar-wrap { margin-bottom: 32px; }\n    .meta-bar-wrap h3 { font-size: 14px; color: #555; margin-bottom: 8px; }\n    .meta-bar { background: #ecf0f1; border-radius: 30px; height: 20px; overflow: hidden; }\n    .meta-fill { height: 100%; border-radius: 30px; background: ${corMeta}; width: ${Math.min(d.percentualMeta, 100)}%; transition: width 0.5s; }\n    .meta-pct { font-size: 13px; color: ${corMeta}; font-weight: 700; margin-top: 4px; }\n    h2 { font-size: 16px; color: #1a5276; margin-bottom: 12px; border-left: 4px solid #2980b9; padding-left: 10px; }\n    table { width: 100%; border-collapse: collapse; margin-bottom: 28px; font-size: 14px; }\n    thead tr { background: #1a5276; color: #fff; }\n    thead th { padding: 10px 12px; text-align: left; font-weight: 600; }\n    .destaque { background: #eaf4fb; border-radius: 10px; padding: 18px 22px; margin-bottom: 28px; }\n    .destaque .nome { font-size: 20px; font-weight: 800; color: #1a5276; }\n    .destaque .sub { font-size: 13px; color: #666; margin-top: 4px; }\n    .footer { background: #f0f3f7; padding: 18px 40px; font-size: 12px; color: #aaa; text-align: center; }\n  </style>\n</head>\n<body>\n<div class=\"container\">\n  <div class=\"header\">\n    <h1>Relat�rio Executivo de Vendas</h1>\n    <p>Gerado automaticamente em ${d.data}</p>\n    <div class=\"badge\">${statusMeta}</div>\n  </div>\n  <div class=\"body\">\n    <div class=\"kpis\">\n      <div class=\"kpi\">\n        <div class=\"valor\">R$ ${parseFloat(d.totalVendas).toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>\n        <div class=\"label\">Total de Vendas</div>\n      </div>\n      <div class=\"kpi\">\n        <div class=\"valor\">${d.totalPedidos}</div>\n        <div class=\"label\">Pedidos</div>\n      </div>\n      <div class=\"kpi\">\n        <div class=\"valor\">R$ ${parseFloat(d.ticketMedio).toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>\n        <div class=\"label\">Ticket M�dio</div>\n      </div>\n    </div>\n\n    <div class=\"meta-bar-wrap\">\n      <h3>Progresso da Meta Di�ria (R$ ${parseFloat(d.metaDiaria).toLocaleString('pt-BR')})</h3>\n      <div class=\"meta-bar\"><div class=\"meta-fill\"></div></div>\n      <div class=\"meta-pct\">${d.percentualMeta}% conclu�do</div>\n    </div>\n\n    <h2>?? Destaque do Dia</h2>\n    <div class=\"destaque\">\n      <div class=\"nome\">${d.melhorVendedor.nome}</div>\n      <div class=\"sub\">Melhor vendedor � R$ ${parseFloat(d.melhorVendedor.valor).toLocaleString('pt-BR', {minimumFractionDigits:2})} em vendas</div>\n    </div>\n\n    <h2>?? Top Produtos</h2>\n    <table>\n      <thead><tr><th>#</th><th>Produto</th><th>Faturamento</th></tr></thead>\n      <tbody>${topProdutosHTML}</tbody>\n    </table>\n\n    <h2>??? Vendas por Regi�o</h2>\n    <table>\n      <thead><tr><th>Regi�o</th><th>Faturamento</th></tr></thead>\n      <tbody>${topRegioesHTML}</tbody>\n    </table>\n  </div>\n  <div class=\"footer\">Relat�rio gerado automaticamente pelo sistema Sucos Natureza � ${d.data}</div>\n</div>\n</body>\n</html>\n`;\n\nreturn [{ json: { html, ...d } }];\n"
+      },
+      "id": "1a2b3c4d-0006-0006-0006-000000000006",
+      "name": "Montar HTML do Relat�rio",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.html2pdf.app/v1/generate?apiKey=YV1jqQPaKmECYITPUVaZexTMrUTHd4vVgKHCdWSs0E2CONhEH3PSW63ghXl3Tqs2",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "html",
+              "value": "={{ $json.html }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "1a2b3c4d-0007-0007-0007-000000000007",
+      "name": "Converter HTML em PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1568,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Passa o JSON de m�tricas adiante para o e-mail e Telegram\nconst metricas = $('Calcular M�tricas').first().json;\nconst pdfBinary = $input.first().binary;\n\nreturn [{\n  json: metricas,\n  binary: pdfBinary\n}];\n"
+      },
+      "id": "1a2b3c4d-0008-0008-0008-000000000008",
+      "name": "Merge PDF + M�tricas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "relatorios@sucosnatureza.com.br",
+        "toEmail": "diretoria@sucosnatureza.com.br",
+        "subject": "=?? Relat�rio de Vendas - {{ $json.data }}",
+        "options": {
+          "attachments": "data"
+        }
+      },
+      "id": "1a2b3c4d-0009-0009-0009-000000000009",
+      "name": "Enviar E-mail para Diretoria",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        2000,
+        192
+      ],
+      "webhookId": "9b28cd56-5e59-472f-a883-86d05dbeef14",
+      "credentials": {
+        "smtp": {
+          "id": "xIBcCFriK7T2LViP",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Monta a mensagem motivacional para o Telegram\nconst d = $('Calcular M�tricas').first().json;\n\nconst emoji = d.atingiuMeta ? '??' : '??';\nconst status = d.atingiuMeta\n  ? '? META DO DIA ATINGIDA! Incr�vel, equipe!'\n  : `? FALTAM R$ ${(parseFloat(d.metaDiaria) - parseFloat(d.totalVendas)).toLocaleString('pt-BR', {minimumFractionDigits:2})} para a meta!`;\n\nconst topProdutosTexto = d.topProdutos\n  .map((p, i) => `  ${['??','??','??'][i]} ${p.nome} - R$ ${parseFloat(p.valor).toLocaleString('pt-BR', {minimumFractionDigits:2})}`)\n  .join('\\n');\n\nconst mensagem = `${emoji} *RELAT�RIO DE VENDAS - ${d.data}*\n\n${status}\n\n?? *Resumo do Dia:*\n?? Faturamento: *R$ ${parseFloat(d.totalVendas).toLocaleString('pt-BR', {minimumFractionDigits:2})}*\n?? Pedidos: *${d.totalPedidos}*\n?? Meta: *${d.percentualMeta}%* conclu�da\n?? Ticket M�dio: R$ ${parseFloat(d.ticketMedio).toLocaleString('pt-BR', {minimumFractionDigits:2})}\n\n?? *Destaque do Dia:*\n?? ${d.melhorVendedor.nome} - R$ ${parseFloat(d.melhorVendedor.valor).toLocaleString('pt-BR', {minimumFractionDigits:2})}\n\n?? *Top Produtos:*\n${topProdutosTexto}\n\n?? Bora superar os limites hoje! A equipe Sucos Natureza � imbat�vel! ??`;\n\nreturn [{ json: { mensagem } }];\n"
+      },
+      "id": "1a2b3c4d-0010-0010-0010-000000000010",
+      "name": "Montar Mensagem Telegram",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2000,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "6737482744",
+        "text": "={{ $json.mensagem }}",
+        "additionalFields": {
+          "disable_notification": false,
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "1a2b3c4d-0011-0011-0011-000000000011",
+      "name": "Enviar Mensagem Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2224,
+        384
+      ],
+      "webhookId": "df6daf7c-8583-41aa-b153-88a1982a4b46",
+      "credentials": {
+        "telegramApi": {
+          "id": "vlMuU0Avw85ChYMV",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.atingiuMeta }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1a2b3c4d-0012-0012-0012-000000000012",
+      "name": "Abaixo da Meta?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2224,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "6737482744",
+        "text": "=?? *ALERTA DE META - {{ $json.data }}*\n\nAten��o diretoria: a meta di�ria de R$ {{ $json.metaDiaria }} ainda n�o foi atingida.\n\n?? Faturamento atual: R$ {{ $json.totalVendas }} ({{ $json.percentualMeta }}%)\n\nAcompanhe o relat�rio completo enviado por e-mail.",
+        "additionalFields": {
+          "disable_notification": false,
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "1a2b3c4d-0013-0013-0013-000000000013",
+      "name": "Alerta Meta p/ Diretoria",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2448,
+        192
+      ],
+      "webhookId": "b2c3817d-c323-480c-8e99-3f4e6e608cfa",
+      "credentials": {
+        "telegramApi": {
+          "id": "vlMuU0Avw85ChYMV",
+          "name": "Telegram account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gatilho Di�rio 07h": {
+      "main": [
+        [
+          {
+            "node": "Listar CSVs no Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listar CSVs no Drive": {
+      "main": [
+        [
+          {
+            "node": "Pegar S� o Mais Recente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pegar S� o Mais Recente": {
+      "main": [
+        [
+          {
+            "node": "Baixar CSV do Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baixar CSV do Drive": {
+      "main": [
+        [
+          {
+            "node": "Converter CSV em JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Converter CSV em JSON": {
+      "main": [
+        [
+          {
+            "node": "Calcular M�tricas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular M�tricas": {
+      "main": [
+        [
+          {
+            "node": "Montar HTML do Relat�rio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar HTML do Relat�rio": {
+      "main": [
+        [
+          {
+            "node": "Converter HTML em PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Converter HTML em PDF": {
+      "main": [
+        [
+          {
+            "node": "Merge PDF + M�tricas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge PDF + M�tricas": {
+      "main": [
+        [
+          {
+            "node": "Enviar E-mail para Diretoria",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Montar Mensagem Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar E-mail para Diretoria": {
+      "main": [
+        [
+          {
+            "node": "Abaixo da Meta?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Abaixo da Meta?": {
+      "main": [
+        [
+          {
+            "node": "Alerta Meta p/ Diretoria",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Montar Mensagem Telegram": {
+      "main": [
+        [
+          {
+            "node": "Enviar Mensagem Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "versionId": "be3cce6c-d3dc-414c-bad2-94fd8a580787",
+  "meta": {
+    "instanceId": "cf8b1ae991d4723afee129cc3a8ea5f79337f24341e44419f1942005af32aab1"
+  },
+  "nodeGroups": [],
+  "id": "9VyO6NFFLXCs8GCN",
+  "tags": []
+}
