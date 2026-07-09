@@ -8,17 +8,17 @@
 }
 
 :root {
-  --bg:           #0a0a0a;
-  --bg-card:      #111111;
-  --bg-dark:      #0d0d0d;
+  --bg:           #1e1e1e;
+  --bg-card:      #272727;
+  --bg-dark:      #181818;
   --accent:       #7c5cfc;
   --accent-soft:  rgba(124, 92, 252, 0.12);
   --accent-glow:  rgba(124, 92, 252, 0.30);
   --text:         #e8e8e8;
-  --text-muted:   #888888;
-  --text-faint:   #3d3d3d;
-  --border:       rgba(255, 255, 255, 0.07);
-  --border-hover: rgba(255, 255, 255, 0.13);
+  --text-muted:   #a0a0a0;
+  --text-faint:   #606060;
+  --border:       rgba(255, 255, 255, 0.10);
+  --border-hover: rgba(255, 255, 255, 0.18);
   --font:         'Space Grotesk', sans-serif;
   --mono:         'JetBrains Mono', monospace;
   --radius:       14px;
@@ -74,7 +74,7 @@ strong { color: var(--text); font-weight: 600; }
   position: sticky;
   top: 0;
   z-index: 200;
-  background: rgba(10, 10, 10, 0.80);
+  background: rgba(30, 30, 30, 0.90);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
@@ -566,6 +566,36 @@ strong { color: var(--text); font-weight: 600; }
   padding: 8px 12px;
 }
 
+/* ── Divisor de sub-seção de projetos ── */
+.projects__divider {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0 8px;
+}
+
+.projects__divider::before,
+.projects__divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.projects__divider-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  padding: 4px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-card);
+}
+
 /* ── Preview Demo button ── */
 .preview-demo-btn {
   background: var(--accent);
@@ -801,7 +831,7 @@ strong { color: var(--text); font-weight: 600; }
     top: 64px;
     left: 0;
     right: 0;
-    background: rgba(10,10,10,0.97);
+    background: rgba(30,30,30,0.97);
     backdrop-filter: blur(20px);
     flex-direction: column;
     align-items: center;
